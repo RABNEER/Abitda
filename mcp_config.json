@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "thetahawk-options-desk": {
+      "command": "python",
+      "args": ["mcp_server.py"],
+      "description": "ThetaHawk: Institutional Regime-Aware Options Desk with Portfolio Greeks Gate & Fiduciary Guardian"
+    }
+  }
+}

@@ -287,6 +287,27 @@ export default function App() {
     fetchAll();
   };
 
+  const triggerStressTest = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/demo/stress-test`, { method: "POST" });
+      const data = await res.json();
+      setDemoBanner({
+        type: 'framed',
+        title: 'BLACK SWAN REPLAY (AUG 5 YEN SHOCK)',
+        message: `VIX surged to 65.73. Naive Bot: -43.8% (-$43.8k blowout). ThetaHawk: -1.24% scratch (-$1,240), preserving $98,760 (98.8%) equity!`
+      });
+      const replaySteps = data.timeline.map((t: any) => ({
+        type: t.vix > 30 ? "VETO" : "OBSERVATION",
+        content: `[${t.label}] SPY $${t.spy_price} | VIX ${t.vix} -> ThetaHawk: ${t.thetahawk_action} (P&L: $${t.thetahawk_pnl})`
+      }));
+      setReactSteps(replaySteps);
+      fetchAll();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const delta = status?.book_greeks.net_delta ?? 0.0;
   const maxDelta = status?.limits.max_delta ?? 0.25;
   const deltaPct = Math.min(Math.abs(delta) / maxDelta, 1.0) * 100;
@@ -924,6 +945,15 @@ export default function App() {
             className="btn btn-inverted-alert">
             <Icons.Lock />
             Simulate Self-Lock (Moment #5)
+          </button>
+
+          <button
+            disabled={isProcessing}
+            onClick={triggerStressTest}
+            className="btn btn-outline"
+            style={{ border: '1.5px solid #ffffff' }}>
+            <Icons.Activity />
+            Black Swan Replay (Aug 5)
           </button>
 
           <button

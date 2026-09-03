@@ -158,6 +158,12 @@ def reset_ledger():
     engine.guardian.is_suspended = False
     return {"status": "RESET_COMPLETE"}
 
+@app.post("/api/demo/stress-test")
+def run_demo_stress_test():
+    from data.stress_test import BlackSwanStressTest
+    tester = BlackSwanStressTest()
+    return tester.run_replay()
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)

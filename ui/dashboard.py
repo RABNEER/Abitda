@@ -281,6 +281,14 @@ if st.sidebar.button("🔒 Simulate Edge Decay (Self-Lock)", use_container_width
     st.session_state.demo_suspended = True
     st.rerun()
 
+# Trigger 5: Historical Black Swan Replay
+if st.sidebar.button("💥 Replay Aug 5 Yen Shock (Black Swan)", use_container_width=True):
+    from data.stress_test import BlackSwanStressTest
+    tester = BlackSwanStressTest()
+    st.session_state.demo_stress_data = tester.run_replay()
+    st.session_state.demo_stress = True
+    st.rerun()
+
 if st.sidebar.button("🔄 Reset Demo / Clear Ledger", use_container_width=True):
     # Clear ledger tables
     with engine.ledger._get_connection() as conn:
@@ -342,6 +350,13 @@ if getattr(st.session_state, "demo_suspended", False):
     st.markdown("""
     <div class="alert-banner-suspended">
         🔒 [TRADING SUSPENDED] Realized win-rate (20.0%) dropped below theoretical floor (70.0%). Autonomous fiduciary lock engaged. No new entries permitted.
+    </div>
+    """, unsafe_allow_html=True)
+
+if getattr(st.session_state, "demo_stress", False):
+    st.markdown("""
+    <div style="background: linear-gradient(90deg, #450a0a 0%, #1e1b4b 100%); border: 1px solid #f43f5e; border-radius: 0.5rem; padding: 1rem; color: #fff1f2; margin-bottom: 1rem;">
+        💥 <b>[BLACK SWAN REPLAY: AUG 5 YEN SHOCK]</b> VIX surged to 65.73. Naive Options Bot: <b>-43.8% account blowout ($-43,800)</b>. ThetaHawk Early Exit: <b>-1.24% scratch ($-1,240)</b>, preserving <b>$98,760 (98.8%) of capital!</b>
     </div>
     """, unsafe_allow_html=True)
 
