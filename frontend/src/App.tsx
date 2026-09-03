@@ -771,15 +771,22 @@ export default function App() {
                   color: s.type === 'THOUGHT' ? 'var(--text-muted)' :
                          s.type === 'TOOL_CALL' ? 'var(--text-pure)' :
                          s.type === 'OBSERVATION' ? 'var(--text-secondary)' :
+                         s.type === 'ALPHA_SCOUT' ? '#a1a1aa' :
+                         s.type === 'RISK_GOVERNOR' ? '#ffffff' :
                          s.type === 'VETO' ? 'var(--text-pure)' :
                          s.type === 'EXECUTION' ? 'var(--text-pure)' : 'var(--text-secondary)',
                   fontWeight: 700,
-                  minWidth: '100px',
-                  textTransform: 'uppercase'
+                  minWidth: '115px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  borderBottom: s.type === 'RISK_GOVERNOR' ? '1px solid #ffffff' : (s.type === 'ALPHA_SCOUT' ? '1px dashed #71717a' : 'none')
                 }}>
-                  [{s.type}]
+                  [{s.type.replace('_', ' ')}]
                 </span>
-                <span style={{ color: s.type === 'VETO' ? '#ffffff' : 'var(--text-primary)' }}>
+                <span style={{
+                  color: s.type === 'VETO' || s.type === 'RISK_GOVERNOR' ? '#ffffff' : (s.type === 'ALPHA_SCOUT' ? '#e4e4e7' : 'var(--text-primary)'),
+                  fontWeight: s.type === 'RISK_GOVERNOR' ? 600 : 400
+                }}>
                   {s.content}
                 </span>
               </div>

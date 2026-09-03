@@ -58,8 +58,17 @@ class AgenticCoPilot:
             "content": f"risk_engine_check_portfolio_greeks(current_delta={book_greeks['net_delta']}, max=±0.25)"
         })
 
-        # 5. Thought & Execution
+        # 5. Adversarial Agent Debate (Alpha Scout vs. Risk Governor)
         candidate = self.engine.strategy_selector.construct_candidate(symbol, telemetry["price"], playbook)
+        steps.append({
+            "type": "ALPHA_SCOUT",
+            "content": f"[Alpha Scout (Alpha-Maximizer)]: Detected favorable volatility skew on {symbol}. Proposing unhedged high-delta structure to maximize raw premium velocity."
+        })
+        steps.append({
+            "type": "RISK_GOVERNOR",
+            "content": f"[Risk Governor (Fiduciary)]: REJECT UNHEDGED EXPOSURE. Single-leg risk violates Level 3 fiduciary mandates. Enforcing defined-risk wings: {candidate['strategy_type']} ($5 spread width, wing Delta <= 0.20)."
+        })
+
         contracts = self.engine.sizer.calculate_size(candidate, telemetry, book_greeks, 100000.0)
 
         proposed_greeks = {

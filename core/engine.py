@@ -23,6 +23,7 @@ from risk.sizing import ConvictionSizer
 from risk.position_manager import PositionManager
 from execution.alpaca_client import AlpacaExecutionEngine
 from memory.trade_logger import TradeLedger
+from agents.copilot_agent import AgenticCoPilot
 
 class ThetaHawkEngine:
     def __init__(self):
@@ -37,6 +38,7 @@ class ThetaHawkEngine:
         self.pos_manager = PositionManager()
         self.broker = AlpacaExecutionEngine()
         self.ledger = TradeLedger()
+        self.copilot = AgenticCoPilot(self)
 
         # Cached states
         self.baseline_equity = 100000.0

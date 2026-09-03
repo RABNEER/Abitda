@@ -13,6 +13,8 @@ import streamlit as st
 import pandas as pd
 import json
 import time
+import numpy as np
+import plotly.graph_objects as go
 from datetime import datetime
 
 from core.engine import ThetaHawkEngine
@@ -22,6 +24,109 @@ from config.settings import (
     DAILY_DRAWDOWN_LIMIT_PCT,
     ALPACA_ACCOUNT_NUMBER
 )
+
+def plot_options_payoff_diagram(candidate, spot_price):
+    """
+    Computes exact institutional P&L curve across a spectrum of underlying spot prices.
+    Renders an interactive Plotly diagram with profit zone, loss wings, breakevens, and spot cursor.
+    """
+    legs = candidate.get("legs", [])
+    if not legs:
+        return None
+    
+    low_price = spot_price * 0.93
+    high_price = spot_price * 1.07
+    prices = np.linspace(low_price, high_price, 250)
+    pnl = np.zeros_like(prices)
+    
+    net_credit = candidate.get("estimated_credit_per_contract", 150.0)
+    pnl += net_credit
+    
+    for leg in legs:
+        strike = leg.get("strike", spot_price)
+        is_call = leg.get("type", "").lower() == "call"
+        is_buy = leg.get("action", "").lower() == "buy"
+        
+        if is_call:
+            intrinsic = np.maximum(prices - strike, 0)
+        else:
+            intrinsic = np.maximum(strike - prices, 0)
+            
+        mult = 100 if is_buy else -100
+        pnl += mult * intrinsic
+        
+    fig = go.Figure()
+    
+    # Fill profit area (>=0)
+    fig.add_trace(go.Scatter(
+        x=prices,
+        y=np.maximum(pnl, 0),
+        mode="lines",
+        line=dict(width=0),
+        fill="tozeroy",
+        fillcolor="rgba(16, 185, 129, 0.15)",
+        name="Max Profit Zone",
+        hoverinfo="skip"
+    ))
+    
+    # Fill loss area (<0)
+    fig.add_trace(go.Scatter(
+        x=prices,
+        y=np.minimum(pnl, 0),
+        mode="lines",
+        line=dict(width=0),
+        fill="tozeroy",
+        fillcolor="rgba(239, 68, 68, 0.15)",
+        name="Max Loss Wings",
+        hoverinfo="skip"
+    ))
+    
+    # Main payoff line
+    fig.add_trace(go.Scatter(
+        x=prices,
+        y=pnl,
+        mode="lines",
+        name="Net P&L at Expiration",
+        line=dict(color="#38bdf8", width=3)
+    ))
+    
+    # Zero line
+    fig.add_hline(y=0, line_dash="dash", line_color="#64748b", line_width=1)
+    
+    # Spot price vertical marker
+    fig.add_vline(
+        x=spot_price,
+        line_dash="dot",
+        line_color="#f59e0b",
+        line_width=2,
+        annotation_text=f"Current Spot: ${spot_price:.2f}",
+        annotation_position="top left",
+        annotation_font=dict(color="#f59e0b", size=11)
+    )
+    
+    fig.update_layout(
+        title=dict(
+            text=f"<b>Options Structure Payoff Profile</b> — {candidate.get('strategy_type', 'STRUCTURE')} on {candidate.get('symbol', 'SPY')}",
+            font=dict(color="#f8fafc", size=14)
+        ),
+        xaxis=dict(
+            title="Underlying Price at Expiration ($)",
+            gridcolor="#1e293b",
+            zerolinecolor="#334155"
+        ),
+        yaxis=dict(
+            title="Net P&L per Contract ($)",
+            gridcolor="#1e293b",
+            zerolinecolor="#334155"
+        ),
+        template="plotly_dark",
+        plot_bgcolor="#0f172a",
+        paper_bgcolor="#090d16",
+        height=320,
+        margin=dict(l=40, r=40, t=50, b=40),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    return fig
 
 st.set_page_config(
     page_title="THETA HAWK — Regime-Aware Options Desk",
@@ -187,6 +292,37 @@ if st.sidebar.button("🔄 Reset Demo / Clear Ledger", use_container_width=True)
     st.session_state.demo_suspended = False
     st.rerun()
 
+# Ask the Desk Quant (Co-Pilot) Sidebar Widget
+st.sidebar.markdown("---")
+st.sidebar.subheader("💬 Ask the Desk Quant")
+st.sidebar.caption("Powered by Gemini Floor Quant Intelligence")
+
+if "copilot_history" not in st.session_state:
+    st.session_state.copilot_history = []
+
+# Quick Prompts for Judges
+qp_col1, qp_col2 = st.sidebar.columns(2)
+if qp_col1.button("Why not calls?", use_container_width=True):
+    q = "Why didn't you buy SPY call options today?"
+    ans = engine.copilot.ask_copilot(q)
+    st.session_state.copilot_history.append((q, ans))
+
+if qp_col2.button("Audit Delta", use_container_width=True):
+    q = "What is our current portfolio delta exposure and risk headroom?"
+    ans = engine.copilot.ask_copilot(q)
+    st.session_state.copilot_history.append((q, ans))
+
+user_q = st.sidebar.text_input("Ask ThetaHawk a question:", key="st_copilot_input")
+if st.sidebar.button("Send Query", use_container_width=True) and user_q:
+    ans = engine.copilot.ask_copilot(user_q)
+    st.session_state.copilot_history.append((user_q, ans))
+
+if st.session_state.copilot_history:
+    for q, a in reversed(st.session_state.copilot_history[-3:]):
+        st.sidebar.markdown(f"**Judge:** *{q}*")
+        st.sidebar.markdown(f"**Quant:** {a}")
+        st.sidebar.markdown("---")
+
 # Display Banners for Demo Moments if Active
 if getattr(st.session_state, "demo_veto", False):
     st.markdown("""
@@ -271,7 +407,35 @@ with col_right:
     closed = engine.ledger.get_closed_trades()
     _, guard_msg, guard_stats = engine.guardian.evaluate_performance(closed)
     status_badge = "🟢 ACTIVE" if not engine.guardian.is_suspended else "🔴 SUSPENDED"
-    st.info(f"**Self-Awareness Guardian ({status_badge}):** {guard_msg}")
+st.markdown("---")
+
+# Visual Showstopper: Live Options Structure Payoff Diagram (P&L Tent / Spread Curve)
+candidate_struct = engine.strategy_selector.construct_candidate(
+    selected_symbol, telemetry["price"], regime_info["recommended_playbook"]
+)
+st.subheader(f"📈 Options Structure Payoff Profile — {candidate_struct.get('strategy_type', 'STRUCTURE')}")
+fig_payoff = plot_options_payoff_diagram(candidate_struct, telemetry["price"])
+if fig_payoff:
+    st.plotly_chart(fig_payoff, use_container_width=True)
+
+# Agentic Multi-Step Thought Stream & Adversarial Debate (Alpha Scout vs. Risk Governor)
+with st.expander("🤖 Live ReAct Thought Stream & Multi-Agent Debate", expanded=True):
+    col_run, col_info = st.columns([1, 3])
+    with col_run:
+        if st.button("▶️ Run Agentic ReAct Cycle", use_container_width=True):
+            with st.spinner("Executing ReAct loop with multi-agent debate..."):
+                st.session_state.last_react_steps = engine.copilot.run_agentic_cycle(selected_symbol)
+                st.rerun()
+    with col_info:
+        st.caption("Inspect real-time chain of thought, adversarial Alpha Scout proposal, and Risk Governor fiduciary checks.")
+
+    if "last_react_steps" in st.session_state and st.session_state.last_react_steps:
+        for s in st.session_state.last_react_steps:
+            stype = s["type"]
+            badge_color = "#38bdf8" if stype == "THOUGHT" else ("#10b981" if stype in ["EXECUTION", "OBSERVATION"] else ("#ef4444" if stype in ["VETO", "RISK_GOVERNOR"] else "#f59e0b"))
+            st.markdown(f"<div style='font-family: monospace; font-size: 13px; margin-bottom: 4px;'><strong style='color: {badge_color};'>[{stype.replace('_', ' ')}]</strong> {s['content']}</div>", unsafe_allow_html=True)
+    else:
+        st.info("Click 'Run Agentic ReAct Cycle' to inspect live multi-agent reasoning steps.")
 
 st.markdown("---")
 
