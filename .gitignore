@@ -1,0 +1,29 @@
+# Environment variables (API keys and secrets)
+.env
+.env.local
+*.env
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Database & Runtime logs
+*.sqlite
+*.sqlite3
+*.db
+logs/
+*.log
+.cache/
+
+# Streamlit & IDE settings
+.streamlit/secrets.toml
+.idea/
+.vscode/
+*.swp

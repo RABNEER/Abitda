@@ -1,0 +1,12 @@
+alpaca-py>=0.21.0
+pandas>=2.1.0
+numpy>=1.26.0
+scipy>=1.11.0
+yfinance>=0.2.36
+streamlit>=1.32.0
+python-dotenv>=1.0.0
+apscheduler>=3.10.4
+anthropic>=0.20.0
+google-genai>=0.1.0
+openai>=1.14.0
+rich>=13.7.0
