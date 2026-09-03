@@ -1,5 +1,59 @@
 import { useState, useEffect } from 'react';
 
+// Custom SVG Icons (Strictly No Emojis, UI/UX Pro Max rule)
+const Icons = {
+  Logo: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 19 21 12 17 5 21 12 2" />
+    </svg>
+  ),
+  Activity: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  ),
+  Shield: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  ),
+  AlertOctagon: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  ),
+  Zap: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  ),
+  Lock: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  ),
+  RotateCcw: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="1 4 1 10 7 10" />
+      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+    </svg>
+  ),
+  Play: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+  ),
+  Close: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+};
+
 interface AccountStatus {
   account_number: string;
   equity: number;
@@ -74,9 +128,8 @@ export default function App() {
   const [closedTrades, setClosedTrades] = useState<Trade[]>([]);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [demoBanner, setDemoBanner] = useState<{ type: string; message: string } | null>(null);
+  const [demoBanner, setDemoBanner] = useState<{ type: string; title: string; message: string } | null>(null);
 
-  // Poll state every 3 seconds
   const fetchAll = async () => {
     try {
       const [sRes, tRes, trRes, aRes] = await Promise.all([
@@ -98,7 +151,7 @@ export default function App() {
         setAuditEvents(d.events || []);
       }
     } catch (e) {
-      console.warn("API poll offline or waiting for backend:", e);
+      console.warn("API offline or waiting:", e);
     }
   };
 
@@ -108,7 +161,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, [symbol]);
 
-  // Actions
   const runCycle = async () => {
     setIsProcessing(true);
     try {
@@ -119,7 +171,11 @@ export default function App() {
       });
       const data = await res.json();
       if (data.status === "EXECUTED") {
-        setDemoBanner({ type: 'success', message: `ORDER EXECUTED: ${data.trade?.strategy_type} on ${symbol} filled on Alpaca MCP.` });
+        setDemoBanner({
+          type: 'solid',
+          title: 'ORDER EXECUTED',
+          message: `${data.trade?.strategy_type} on ${symbol} filled on Alpaca MCP with $${data.trade?.net_credit.toFixed(2)} premium collected.`
+        });
       }
       fetchAll();
     } finally {
@@ -133,8 +189,9 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/demo/veto?symbol=${symbol}`, { method: "POST" });
       const data = await res.json();
       setDemoBanner({
-        type: 'veto',
-        message: data.reason || `[PORTFOLIO GREEKS VETO] Trade blocked: Aggregate Delta would breach book limit (±0.25).`
+        type: 'framed',
+        title: 'PORTFOLIO GREEKS VETO',
+        message: data.reason || `Trade blocked: Aggregate book Delta would breach risk limit (±0.25). Fiduciary barrier preserved.`
       });
       fetchAll();
     } finally {
@@ -147,8 +204,9 @@ export default function App() {
     try {
       await fetch(`${API_BASE}/api/demo/regime-flip?symbol=${symbol}`, { method: "POST" });
       setDemoBanner({
-        type: 'flip',
-        message: `[REGIME-FLIP LIQUIDATION] VIX spike detected (EVENT_RISK). Open spreads force-closed immediately before volatility expansion.`
+        type: 'framed',
+        title: 'REGIME-FLIP FORCED EXIT',
+        message: `Market state shifted to EVENT_RISK (VIX spike). Open spreads force-closed immediately before tail-risk expansion.`
       });
       fetchAll();
     } finally {
@@ -161,8 +219,9 @@ export default function App() {
     try {
       await fetch(`${API_BASE}/api/demo/suspend?symbol=${symbol}`, { method: "POST" });
       setDemoBanner({
-        type: 'suspend',
-        message: `[TRADING SUSPENDED] Trailing win-rate (20.0%) fell below expected edge (70.0%). Autonomous fiduciary lock engaged.`
+        type: 'solid',
+        title: 'TRADING SUSPENDED (SELF-LOCK)',
+        message: `Rolling win-rate (20.0%) dropped below theoretical floor (70.0%). Autonomous fiduciary lock engaged.`
       });
       fetchAll();
     } finally {
@@ -179,250 +238,414 @@ export default function App() {
   const delta = status?.book_greeks.net_delta ?? 0.0;
   const maxDelta = status?.limits.max_delta ?? 0.25;
   const deltaPct = Math.min(Math.abs(delta) / maxDelta, 1.0) * 100;
-
   const currentRegime = telemetry?.regime.regime ?? "RANGE_BOUND";
-  const regimeColor = currentRegime === "RANGE_BOUND" ? "var(--emerald)" : currentRegime === "TRENDING" ? "var(--cyan)" : "var(--crimson)";
 
   return (
-    <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '1.5rem' }}>
+    <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '1.5rem 2rem' }}>
       
-      {/* Top Navigation Bar */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ fontSize: '2.2rem' }}>🦅</div>
+      {/* Precision Header */}
+      <header style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingBottom: '1.25rem',
+        marginBottom: '1.5rem',
+        borderBottom: '1px solid var(--border-subtle)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            background: 'var(--text-pure)',
+            color: 'var(--bg-root)',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Icons.Logo />
+          </div>
           <div>
-            <h1 style={{ fontSize: '1.8rem', fontWeight: 800, background: 'linear-gradient(90deg, #38bdf8, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              THETA HAWK
-            </h1>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                THETA HAWK
+              </h1>
+              <span style={{
+                fontSize: '0.6875rem',
+                border: '1px solid var(--border-strong)',
+                padding: '1px 6px',
+                borderRadius: '3px',
+                color: 'var(--text-secondary)',
+                letterSpacing: '0.05em'
+              }}>
+                DESK v1.0
+              </span>
+            </div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               Regime-Aware Options Desk · Official Alpaca MCP Native
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          {/* Account Indicator */}
           <div style={{ textAlign: 'right' }}>
-            <span className="mono" style={{ fontSize: '0.75rem', background: 'rgba(30, 41, 59, 0.8)', padding: '4px 8px', borderRadius: '4px', color: 'var(--cyan)' }}>
-              Paper Acct: {status?.account_number || "PA382FDPI5IO"}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', marginTop: '4px' }}>
-              <span className="pulse-dot" style={{ backgroundColor: 'var(--emerald)' }}></span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--emerald)', fontWeight: 600 }}>Alpaca MCP Connected (Tier 3)</span>
+            <div className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+              {status?.account_number || "PA382FDPI5IO"}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', marginTop: '3px' }}>
+              <span className="status-dot status-dot-pulse"></span>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                Alpaca Paper Tier 3
+              </span>
             </div>
           </div>
 
-          <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', gap: '4px' }}>
-            <button 
+          {/* Symbol Selector Switcher */}
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-strong)',
+            padding: '2px',
+            borderRadius: '6px',
+            display: 'flex',
+            gap: '2px'
+          }}>
+            <button
               onClick={() => setSymbol('SPY')}
-              className={`btn ${symbol === 'SPY' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
+              className="btn"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.75rem',
+                background: symbol === 'SPY' ? 'var(--text-pure)' : 'transparent',
+                color: symbol === 'SPY' ? 'var(--bg-root)' : 'var(--text-secondary)'
+              }}>
               SPY
             </button>
-            <button 
+            <button
               onClick={() => setSymbol('QQQ')}
-              className={`btn ${symbol === 'QQQ' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
+              className="btn"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.75rem',
+                background: symbol === 'QQQ' ? 'var(--text-pure)' : 'transparent',
+                color: symbol === 'QQQ' ? 'var(--bg-root)' : 'var(--text-secondary)'
+              }}>
               QQQ
             </button>
           </div>
         </div>
       </header>
 
-      {/* Demo Action Banner */}
+      {/* Dynamic Monochrome Alert Banner */}
       {demoBanner && (
-        <div className="slide-down" style={{
-          padding: '1rem 1.25rem',
-          borderRadius: '10px',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontWeight: 600,
-          background: demoBanner.type === 'veto' ? 'linear-gradient(90deg, #7f1d1d, #450a0a)' :
-                      demoBanner.type === 'flip' ? 'linear-gradient(90deg, #78350f, #451a03)' :
-                      demoBanner.type === 'suspend' ? 'linear-gradient(90deg, #581c87, #3b0764)' :
-                      'linear-gradient(90deg, #064e3b, #022c22)',
-          border: `1px solid ${demoBanner.type === 'veto' ? 'var(--crimson)' : demoBanner.type === 'flip' ? 'var(--amber)' : demoBanner.type === 'suspend' ? 'var(--violet)' : 'var(--emerald)'}`
-        }}>
-          <div>{demoBanner.message}</div>
-          <button onClick={() => setDemoBanner(null)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1rem' }}>✕</button>
+        <div className={`alert-banner ${demoBanner.type === 'solid' ? 'banner-inverted' : 'banner-framed'}`}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: '20px',
+              height: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: demoBanner.type === 'solid' ? 'var(--bg-root)' : 'var(--text-pure)',
+              color: demoBanner.type === 'solid' ? 'var(--text-pure)' : 'var(--bg-root)',
+              borderRadius: '50%'
+            }}>
+              <Icons.AlertOctagon />
+            </div>
+            <div>
+              <span style={{ letterSpacing: '0.05em', textTransform: 'uppercase', marginRight: '8px' }}>
+                [{demoBanner.title}]
+              </span>
+              <span>{demoBanner.message}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setDemoBanner(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              padding: '4px',
+              display: 'flex'
+            }}>
+            <Icons.Close />
+          </button>
         </div>
       )}
 
-      {/* Top Metrics Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div className="glass-card">
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Portfolio Equity</div>
-          <div className="mono" style={{ fontSize: '1.6rem', fontWeight: 700 }}>
+      {/* Top 5 Metrics Row */}
+      <section style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: '1rem',
+        marginBottom: '1.5rem'
+      }}>
+        <div className="mono-card">
+          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+            Account Equity
+          </div>
+          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
             ${status ? status.equity.toLocaleString('en-US', { minimumFractionDigits: 2 }) : "100,000.00"}
           </div>
         </div>
 
-        <div className="glass-card">
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Buying Power</div>
-          <div className="mono" style={{ fontSize: '1.6rem', fontWeight: 700 }}>
+        <div className="mono-card">
+          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+            Buying Power
+          </div>
+          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
             ${status ? status.buying_power.toLocaleString('en-US', { minimumFractionDigits: 2 }) : "400,000.00"}
           </div>
         </div>
 
-        <div className="glass-card">
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Net Book Delta (±{maxDelta})</div>
-          <div className="mono" style={{ fontSize: '1.6rem', fontWeight: 700, color: Math.abs(delta) > 0.20 ? 'var(--amber)' : 'var(--cyan)' }}>
+        <div className="mono-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Net Book Delta (±{maxDelta})
+            </span>
+            <span className="mono" style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
+              {deltaPct.toFixed(0)}%
+            </span>
+          </div>
+          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
             {delta > 0 ? `+${delta.toFixed(4)}` : delta.toFixed(4)}
           </div>
-          <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
-            <div style={{ width: `${deltaPct}%`, height: '100%', background: Math.abs(delta) > 0.20 ? 'var(--amber)' : 'var(--cyan)', transition: 'width 0.3s' }}></div>
+          <div style={{ width: '100%', height: '3px', background: 'var(--border-strong)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
+            <div style={{ width: `${deltaPct}%`, height: '100%', background: 'var(--text-pure)' }}></div>
           </div>
         </div>
 
-        <div className="glass-card">
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Net Book Vega</div>
-          <div className="mono" style={{ fontSize: '1.6rem', fontWeight: 700 }}>
+        <div className="mono-card">
+          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+            Net Book Vega
+          </div>
+          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
             {status?.book_greeks.net_vega ? (status.book_greeks.net_vega > 0 ? `+${status.book_greeks.net_vega.toFixed(2)}` : status.book_greeks.net_vega.toFixed(2)) : "0.00"}
           </div>
         </div>
 
-        <div className="glass-card">
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Daily Theta Generation</div>
-          <div className="mono" style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--emerald)' }}>
+        <div className="mono-card">
+          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+            Daily Theta Decay
+          </div>
+          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
             +${status?.book_greeks.net_theta ? status.book_greeks.net_theta.toFixed(2) : "0.00"}/day
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Main Grid: Left = Regime & Strategy, Right = Greeks & Book */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      {/* Main Grid: Left = Regime & Reasoning, Right = Book & Audit */}
+      <section style={{
+        display: 'grid',
+        gridTemplateColumns: '1.2fr 1fr',
+        gap: '1.25rem',
+        marginBottom: '1.5rem'
+      }}>
         
-        {/* Left: Regime Radar & AI Reasoning */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* Left: Regime Radar & Floor Reasoning */}
+        <div className="mono-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              🌐 Market Regime & Reasoning Engine
-            </h2>
-            <span style={{ fontSize: '0.8rem', padding: '4px 10px', borderRadius: '6px', fontWeight: 700, color: regimeColor, border: `1px solid ${regimeColor}`, background: 'rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Icons.Activity />
+              <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                Regime & Reasoning Engine
+              </h2>
+            </div>
+            
+            {/* Regime Badge - Inverted High Contrast */}
+            <span style={{
+              fontSize: '0.6875rem',
+              fontWeight: 800,
+              letterSpacing: '0.06em',
+              padding: '3px 8px',
+              borderRadius: '4px',
+              background: currentRegime === 'EVENT_RISK' ? 'var(--text-pure)' : 'transparent',
+              color: currentRegime === 'EVENT_RISK' ? 'var(--bg-root)' : 'var(--text-pure)',
+              border: '1.5px solid var(--text-pure)'
+            }}>
               {currentRegime}
             </span>
           </div>
 
-          <div style={{ background: 'rgba(10, 15, 28, 0.8)', borderLeft: `4px solid ${regimeColor}`, padding: '1rem', borderRadius: '8px' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
-              Gemini Senior Floor Reasoning
+          {/* Floor Monologue */}
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-strong)',
+            padding: '1rem',
+            borderRadius: '6px'
+          }}>
+            <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+              Gemini Floor Synthesis
             </div>
-            <div style={{ fontSize: '0.95rem', color: '#e2e8f0', fontStyle: 'italic', lineHeight: 1.5 }}>
-              "{telemetry?.regime.reasoning || "Analyzing real-time market microstructure and volatility clustering..."}"
+            <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+              "{telemetry?.regime.reasoning || "Reading real-time volatility clustering and regime dynamics..."}"
             </div>
           </div>
 
+          {/* Micro Telemetry Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-            <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{symbol} Spot</div>
-              <div className="mono" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{symbol} Spot</div>
+              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
                 ${telemetry?.telemetry.price.toFixed(2) || "550.00"}
               </div>
             </div>
-            <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>VIX Index</div>
-              <div className="mono" style={{ fontSize: '1.1rem', fontWeight: 700, color: (telemetry?.telemetry.vix || 16) > 20 ? 'var(--amber)' : 'var(--text-primary)' }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>VIX Index</div>
+              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
                 {telemetry?.telemetry.vix.toFixed(2) || "15.50"}
               </div>
             </div>
-            <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>IV Percentile</div>
-              <div className="mono" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>IV Percentile</div>
+              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
                 {telemetry?.telemetry.iv_percentile.toFixed(1) || "22.5"}%
               </div>
             </div>
-            <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Trend Slope</div>
-              <div className="mono" style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--cyan)' }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>Trend State</div>
+              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
                 {telemetry?.telemetry.trend || "UPTREND"}
               </div>
             </div>
           </div>
 
-          {/* Payoff Curve Visualization */}
-          <div style={{ background: 'rgba(8, 12, 22, 0.9)', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem' }}>
+          {/* Monochrome Payoff Curve */}
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-strong)',
+            borderRadius: '6px',
+            padding: '1rem'
+          }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Structure Payoff: {telemetry?.regime.recommended_playbook || "IRON_CONDOR"}
               </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--emerald)' }}>Positive Theta Domain</span>
+              <span className="mono" style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
+                Theta Domain: +P&L
+              </span>
             </div>
 
-            <svg viewBox="0 0 500 120" style={{ width: '100%', height: '100px' }}>
-              {/* Zero line */}
-              <line x1="20" y1="70" x2="480" y2="70" stroke="rgba(255,255,255,0.15)" strokeDasharray="3 3" />
-              {/* Payoff plateau */}
-              <path d="M 40 100 L 140 30 L 360 30 L 460 100" fill="none" stroke="var(--cyan)" strokeWidth="3" />
-              {/* Fill area */}
-              <polygon points="40,100 140,30 360,30 460,100 460,70 40,70" fill="rgba(56, 189, 248, 0.12)" />
-              {/* Current Price Marker */}
-              <circle cx="250" cy="30" r="5" fill="#ffffff" />
-              <text x="250" y="20" textAnchor="middle" fill="#ffffff" fontSize="10" fontFamily="sans-serif">Spot ${telemetry?.telemetry.price.toFixed(0) || "550"}</text>
-              <text x="140" y="85" textAnchor="middle" fill="var(--text-muted)" fontSize="9">Short Put</text>
-              <text x="360" y="85" textAnchor="middle" fill="var(--text-muted)" fontSize="9">Short Call</text>
+            <svg viewBox="0 0 500 120" style={{ width: '100%', height: '100px', display: 'block' }}>
+              {/* Neutral baseline */}
+              <line x1="20" y1="70" x2="480" y2="70" stroke="var(--border-strong)" strokeDasharray="3 3" />
+              {/* Payoff geometry */}
+              <path d="M 40 100 L 140 30 L 360 30 L 460 100" fill="none" stroke="var(--text-pure)" strokeWidth="2.5" />
+              {/* Plateau shading */}
+              <polygon points="40,100 140,30 360,30 460,100 460,70 40,70" fill="rgba(255, 255, 255, 0.06)" />
+              {/* Spot marker */}
+              <circle cx="250" cy="30" r="4" fill="var(--bg-root)" stroke="var(--text-pure)" strokeWidth="2" />
+              <text x="250" y="20" textAnchor="middle" fill="var(--text-pure)" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="600">Spot ${telemetry?.telemetry.price.toFixed(0) || "550"}</text>
+              <text x="140" y="86" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="Inter, sans-serif">Short Put</text>
+              <text x="360" y="86" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="Inter, sans-serif">Short Call</text>
             </svg>
           </div>
 
         </div>
 
         {/* Right: Active Book & Fiduciary Risk Gates */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="mono-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-              🛡️ Active Book & Fiduciary Gates
-            </h2>
-            <span style={{ fontSize: '0.75rem', color: status?.guardian.is_suspended ? 'var(--crimson)' : 'var(--emerald)', fontWeight: 600 }}>
-              {status?.guardian.is_suspended ? "🔴 FIDUCIARY LOCK" : "🟢 ACTIVE"}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Icons.Shield />
+              <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                Fiduciary Risk Gates
+              </h2>
+            </div>
+            <span style={{
+              fontSize: '0.6875rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: '3px',
+              border: '1px solid var(--border-strong)',
+              color: status?.guardian.is_suspended ? 'var(--text-pure)' : 'var(--text-secondary)'
+            }}>
+              {status?.guardian.is_suspended ? "FIDUCIARY LOCK ENGAGED" : "GUARDIAN ACTIVE"}
             </span>
           </div>
 
-          <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Self-Awareness Guardian Status</div>
-            <div style={{ fontSize: '0.85rem', color: status?.guardian.is_suspended ? '#fca5a5' : '#86efac' }}>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
+            padding: '0.75rem 1rem',
+            borderRadius: '6px'
+          }}>
+            <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
+              Self-Awareness Layer (Win-Rate Degradation Check)
+            </div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>
               {status?.guardian.message || "Auditing trailing win-rate against expected mathematical edge..."}
             </div>
           </div>
 
           {/* Open Positions List */}
           <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-              Active Options Positions ({openTrades.length})
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Active Positions ({openTrades.length})
+              </span>
+              <span className="mono" style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
+                Closed: {closedTrades.length}
+              </span>
             </div>
+
             {openTrades.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '170px', overflowY: 'auto' }}>
                 {openTrades.map((t) => (
-                  <div key={t.id} style={{ background: 'rgba(10, 15, 28, 0.9)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div key={t.id} style={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    padding: '0.625rem 0.875rem',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
                     <div>
-                      <span style={{ fontWeight: 700, color: 'var(--cyan)' }}>{t.symbol}</span> · <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t.strategy_type}</span>
+                      <span className="mono" style={{ fontWeight: 700, color: 'var(--text-pure)' }}>{t.symbol}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>{t.strategy_type}</span>
                     </div>
-                    <div className="mono" style={{ fontSize: '0.85rem', color: 'var(--emerald)' }}>
-                      +${t.net_credit.toFixed(2)} credit
+                    <div className="mono" style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-pure)' }}>
+                      +${t.net_credit.toFixed(2)}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', border: '1px dashed var(--border)', borderRadius: '8px' }}>
-                No active spreads open. Click "Run Autonomous Cycle" below to scan.
+              <div style={{
+                padding: '1.5rem',
+                textAlign: 'center',
+                color: 'var(--text-muted)',
+                fontSize: '0.8125rem',
+                border: '1px dashed var(--border-strong)',
+                borderRadius: '6px'
+              }}>
+                No open positions in book. Click "Run Cycle" to evaluate candidates.
               </div>
             )}
           </div>
 
-          {/* Closed Trades History Counter */}
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Closed Audit Trades Recorded: <span className="mono" style={{ color: 'var(--text-primary)' }}>{closedTrades.length}</span>
-          </div>
-
-          {/* Live Chronological Audit Log */}
+          {/* Chronological Audit Log */}
           <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-              Chronological Fiduciary Audit Trail
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+              Chronological Audit Trail
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '160px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', maxHeight: '150px', overflowY: 'auto' }}>
               {auditEvents.slice(0, 5).map((ev) => (
-                <div key={ev.id} style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', background: 'rgba(15, 23, 42, 0.7)', borderLeft: `3px solid ${ev.event_type.includes('VETO') ? 'var(--crimson)' : ev.event_type.includes('FLIP') ? 'var(--amber)' : ev.event_type.includes('SUSPEN') ? 'var(--violet)' : 'var(--cyan)'}` }}>
-                  <span className="mono" style={{ color: 'var(--text-muted)' }}>{ev.timestamp.split('T')[1]?.slice(0, 8)}</span> <strong style={{ color: '#fff' }}>[{ev.event_type}]</strong> {ev.message}
+                <div key={ev.id} style={{
+                  fontSize: '0.75rem',
+                  padding: '5px 8px',
+                  borderRadius: '4px',
+                  background: 'var(--bg-surface)',
+                  borderLeft: '2px solid var(--text-pure)',
+                  color: 'var(--text-primary)'
+                }}>
+                  <span className="mono" style={{ color: 'var(--text-muted)', marginRight: '6px' }}>
+                    {ev.timestamp.split('T')[1]?.slice(0, 8)}
+                  </span>
+                  <strong style={{ color: 'var(--text-pure)', marginRight: '6px' }}>[{ev.event_type}]</strong>
+                  <span>{ev.message}</span>
                 </div>
               ))}
             </div>
@@ -430,48 +653,68 @@ export default function App() {
 
         </div>
 
-      </div>
+      </section>
 
-      {/* Floating Demo Control Dock */}
-      <div className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(13, 20, 36, 0.95)', border: '1px solid var(--border-glow)' }}>
+      {/* Floating Demo Control Dock - Precision Monochrome */}
+      <footer className="mono-card" style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '1rem 1.25rem',
+        border: '1.5px solid var(--border-strong)',
+        background: 'var(--bg-surface)'
+      }}>
         <div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>🎬 5-Minute Pitch Video Controls</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>One-click triggers for all hackathon demo moments</div>
+          <div style={{ fontSize: '0.8125rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            Hackathon 5-Minute Pitch Controls
+          </div>
+          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+            One-click triggers for all 4 demo moments specified in docs/doc.md
+          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button 
-            disabled={isProcessing} 
-            onClick={runCycle} 
-            className="btn btn-primary">
-            ▶️ Run Autonomous Cycle
+        <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center' }}>
+          <button
+            disabled={isProcessing}
+            onClick={runCycle}
+            className="btn btn-solid-white">
+            <Icons.Play />
+            Run Autonomous Cycle
           </button>
-          <button 
-            disabled={isProcessing} 
-            onClick={triggerVeto} 
-            className="btn btn-danger">
-            🛑 Trigger Greeks VETO (Moment #3)
+
+          <button
+            disabled={isProcessing}
+            onClick={triggerVeto}
+            className="btn btn-outline">
+            <Icons.AlertOctagon />
+            Trigger Greeks VETO (Moment #3)
           </button>
-          <button 
-            disabled={isProcessing} 
-            onClick={triggerFlip} 
-            className="btn btn-warning">
-            ⚡ Trigger Regime Flip (Moment #4)
+
+          <button
+            disabled={isProcessing}
+            onClick={triggerFlip}
+            className="btn btn-outline">
+            <Icons.Zap />
+            Trigger Regime Flip (Moment #4)
           </button>
-          <button 
-            disabled={isProcessing} 
-            onClick={triggerSuspend} 
-            className="btn btn-violet">
-            🔒 Simulate Self-Lock (Moment #5)
+
+          <button
+            disabled={isProcessing}
+            onClick={triggerSuspend}
+            className="btn btn-inverted-alert">
+            <Icons.Lock />
+            Simulate Self-Lock (Moment #5)
           </button>
-          <button 
-            disabled={isProcessing} 
-            onClick={triggerReset} 
-            className="btn btn-secondary">
-            🔄 Reset Demo
+
+          <button
+            disabled={isProcessing}
+            onClick={triggerReset}
+            className="btn btn-ghost">
+            <Icons.RotateCcw />
+            Reset
           </button>
         </div>
-      </div>
+      </footer>
 
     </div>
   );
