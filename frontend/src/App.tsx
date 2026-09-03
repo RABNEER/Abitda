@@ -17,6 +17,17 @@ const Icons = {
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   ),
+  Terminal: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="4 17 10 11 4 5" />
+      <line x1="12" y1="19" x2="20" y2="19" />
+    </svg>
+  ),
+  MessageSquare: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  ),
   AlertOctagon: () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2" />
@@ -44,6 +55,12 @@ const Icons = {
   Play: () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
       <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+  ),
+  Send: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13" />
+      <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </svg>
   ),
   Close: () => (
@@ -118,6 +135,11 @@ interface AuditEvent {
   message: string;
 }
 
+interface ReActStep {
+  type: string;
+  content: string;
+}
+
 const API_BASE = "http://127.0.0.1:8000";
 
 export default function App() {
@@ -129,6 +151,16 @@ export default function App() {
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [demoBanner, setDemoBanner] = useState<{ type: string; title: string; message: string } | null>(null);
+
+  // Agentic ReAct State
+  const [reactSteps, setReactSteps] = useState<ReActStep[]>([
+    { type: "THOUGHT", content: "Agent initialized in autonomous surveillance mode. Ready to evaluate SPY options." }
+  ]);
+  const [chatPrompt, setChatPrompt] = useState("");
+  const [chatHistory, setChatHistory] = useState<Array<{ sender: 'user' | 'agent'; text: string }>>([
+    { sender: 'agent', text: "ThetaHawk desk online. Ask me about our portfolio Greeks, current regime, or trade gating logic." }
+  ]);
+  const [activeConsoleTab, setActiveConsoleTab] = useState<'thought' | 'copilot'>('thought');
 
   const fetchAll = async () => {
     try {
@@ -161,25 +193,44 @@ export default function App() {
     return () => clearInterval(interval);
   }, [symbol]);
 
-  const runCycle = async () => {
+  // Run Agentic ReAct Cycle
+  const runAgenticCycle = async () => {
     setIsProcessing(true);
     try {
-      const res = await fetch(`${API_BASE}/api/cycle`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbol })
-      });
-      const data = await res.json();
-      if (data.status === "EXECUTED") {
-        setDemoBanner({
-          type: 'solid',
-          title: 'ORDER EXECUTED',
-          message: `${data.trade?.strategy_type} on ${symbol} filled on Alpaca MCP with $${data.trade?.net_credit.toFixed(2)} premium collected.`
-        });
+      const res = await fetch(`${API_BASE}/api/agent/react?symbol=${symbol}`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setReactSteps(data.steps || []);
+        setActiveConsoleTab('thought');
       }
       fetchAll();
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // Chat with Co-Pilot
+  const handleSendMessage = async (customPrompt?: string) => {
+    const promptToSend = customPrompt || chatPrompt;
+    if (!promptToSend.trim()) return;
+
+    const userMsg = { sender: 'user' as const, text: promptToSend };
+    setChatHistory(prev => [...prev, userMsg]);
+    if (!customPrompt) setChatPrompt("");
+    setActiveConsoleTab('copilot');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/agent/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: promptToSend })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setChatHistory(prev => [...prev, { sender: 'agent', text: data.reply }]);
+      }
+    } catch {
+      setChatHistory(prev => [...prev, { sender: 'agent', text: "Desk connection offline. Re-evaluating broker gateway." }]);
     }
   };
 
@@ -232,6 +283,7 @@ export default function App() {
   const triggerReset = async () => {
     await fetch(`${API_BASE}/api/demo/reset`, { method: "POST" });
     setDemoBanner(null);
+    setReactSteps([{ type: "THOUGHT", content: "Ledger reset. Desk surveillance re-initialized." }]);
     fetchAll();
   };
 
@@ -278,11 +330,11 @@ export default function App() {
                 color: 'var(--text-secondary)',
                 letterSpacing: '0.05em'
               }}>
-                DESK v1.0
+                AUTONOMOUS DESK v1.0
               </span>
             </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Regime-Aware Options Desk · Official Alpaca MCP Native
+              Regime-Aware Options Desk · Official Alpaca MCP Native · ReAct Agent Engine
             </p>
           </div>
         </div>
@@ -453,7 +505,6 @@ export default function App() {
               </h2>
             </div>
             
-            {/* Regime Badge - Inverted High Contrast */}
             <span style={{
               fontSize: '0.6875rem',
               fontWeight: 800,
@@ -523,18 +574,14 @@ export default function App() {
                 Structure Payoff: {telemetry?.regime.recommended_playbook || "IRON_CONDOR"}
               </span>
               <span className="mono" style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
-                Theta Domain: +P&L
+                Positive Theta Domain
               </span>
             </div>
 
             <svg viewBox="0 0 500 120" style={{ width: '100%', height: '100px', display: 'block' }}>
-              {/* Neutral baseline */}
               <line x1="20" y1="70" x2="480" y2="70" stroke="var(--border-strong)" strokeDasharray="3 3" />
-              {/* Payoff geometry */}
               <path d="M 40 100 L 140 30 L 360 30 L 460 100" fill="none" stroke="var(--text-pure)" strokeWidth="2.5" />
-              {/* Plateau shading */}
               <polygon points="40,100 140,30 360,30 460,100 460,70 40,70" fill="rgba(255, 255, 255, 0.06)" />
-              {/* Spot marker */}
               <circle cx="250" cy="30" r="4" fill="var(--bg-root)" stroke="var(--text-pure)" strokeWidth="2" />
               <text x="250" y="20" textAnchor="middle" fill="var(--text-pure)" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="600">Spot ${telemetry?.telemetry.price.toFixed(0) || "550"}</text>
               <text x="140" y="86" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="Inter, sans-serif">Short Put</text>
@@ -591,7 +638,7 @@ export default function App() {
             </div>
 
             {openTrades.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '170px', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '160px', overflowY: 'auto' }}>
                 {openTrades.map((t) => (
                   <div key={t.id} style={{
                     background: 'var(--bg-surface)',
@@ -614,7 +661,7 @@ export default function App() {
               </div>
             ) : (
               <div style={{
-                padding: '1.5rem',
+                padding: '1.25rem',
                 textAlign: 'center',
                 color: 'var(--text-muted)',
                 fontSize: '0.8125rem',
@@ -631,11 +678,11 @@ export default function App() {
             <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
               Chronological Audit Trail
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', maxHeight: '150px', overflowY: 'auto' }}>
-              {auditEvents.slice(0, 5).map((ev) => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', maxHeight: '130px', overflowY: 'auto' }}>
+              {auditEvents.slice(0, 4).map((ev) => (
                 <div key={ev.id} style={{
                   fontSize: '0.75rem',
-                  padding: '5px 8px',
+                  padding: '4px 8px',
                   borderRadius: '4px',
                   background: 'var(--bg-surface)',
                   borderLeft: '2px solid var(--text-pure)',
@@ -653,6 +700,172 @@ export default function App() {
 
         </div>
 
+      </section>
+
+      {/* NEW: Agentic Live Thought Stream & Interactive Co-Pilot Console */}
+      <section className="mono-card" style={{ marginBottom: '1.5rem', background: 'var(--bg-surface)' }}>
+        {/* Console Header Tabs */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid var(--border-strong)',
+          paddingBottom: '0.75rem',
+          marginBottom: '1rem'
+        }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => setActiveConsoleTab('thought')}
+              className="btn"
+              style={{
+                fontSize: '0.75rem',
+                padding: '0.4rem 0.8rem',
+                background: activeConsoleTab === 'thought' ? 'var(--text-pure)' : 'transparent',
+                color: activeConsoleTab === 'thought' ? 'var(--bg-root)' : 'var(--text-secondary)',
+                border: '1px solid var(--border-strong)'
+              }}>
+              <Icons.Terminal />
+              Live ReAct Thought Stream ({reactSteps.length})
+            </button>
+            <button
+              onClick={() => setActiveConsoleTab('copilot')}
+              className="btn"
+              style={{
+                fontSize: '0.75rem',
+                padding: '0.4rem 0.8rem',
+                background: activeConsoleTab === 'copilot' ? 'var(--text-pure)' : 'transparent',
+                color: activeConsoleTab === 'copilot' ? 'var(--bg-root)' : 'var(--text-secondary)',
+                border: '1px solid var(--border-strong)'
+              }}>
+              <Icons.MessageSquare />
+              Interactive Desk Co-Pilot
+            </button>
+          </div>
+
+          <button
+            disabled={isProcessing}
+            onClick={runAgenticCycle}
+            className="btn btn-outline"
+            style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
+            <Icons.Play />
+            Run Agentic ReAct Cycle
+          </button>
+        </div>
+
+        {/* Tab 1: Live ReAct Thought Stream */}
+        {activeConsoleTab === 'thought' && (
+          <div style={{
+            background: 'var(--bg-root)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: '6px',
+            padding: '1rem',
+            maxHeight: '220px',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem'
+          }}>
+            {reactSteps.map((s, idx) => (
+              <div key={idx} className="mono" style={{ fontSize: '0.75rem', lineHeight: 1.5, display: 'flex', gap: '0.5rem' }}>
+                <span style={{
+                  color: s.type === 'THOUGHT' ? 'var(--text-muted)' :
+                         s.type === 'TOOL_CALL' ? 'var(--text-pure)' :
+                         s.type === 'OBSERVATION' ? 'var(--text-secondary)' :
+                         s.type === 'VETO' ? 'var(--text-pure)' :
+                         s.type === 'EXECUTION' ? 'var(--text-pure)' : 'var(--text-secondary)',
+                  fontWeight: 700,
+                  minWidth: '100px',
+                  textTransform: 'uppercase'
+                }}>
+                  [{s.type}]
+                </span>
+                <span style={{ color: s.type === 'VETO' ? '#ffffff' : 'var(--text-primary)' }}>
+                  {s.content}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Tab 2: Interactive Desk Co-Pilot Chat */}
+        {activeConsoleTab === 'copilot' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{
+              background: 'var(--bg-root)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '6px',
+              padding: '1rem',
+              maxHeight: '200px',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.625rem'
+            }}>
+              {chatHistory.map((msg, idx) => (
+                <div key={idx} style={{
+                  fontSize: '0.8125rem',
+                  lineHeight: 1.5,
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                  background: msg.sender === 'user' ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                  border: msg.sender === 'user' ? '1px solid var(--border-strong)' : '1px solid var(--border-subtle)',
+                  maxWidth: '85%'
+                }}>
+                  <strong style={{ color: 'var(--text-pure)', marginRight: '6px' }}>
+                    {msg.sender === 'user' ? "YOU:" : "THETA HAWK:"}
+                  </strong>
+                  <span style={{ color: 'var(--text-primary)' }}>{msg.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Prompts for Judges */}
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Suggested queries:</span>
+              <button
+                onClick={() => handleSendMessage("What is our current portfolio delta exposure and risk headroom?")}
+                className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.6875rem' }}>
+                "Audit Portfolio Delta"
+              </button>
+              <button
+                onClick={() => handleSendMessage("Why did you select this strategy instead of an Iron Condor?")}
+                className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.6875rem' }}>
+                "Explain Strategy Choice"
+              </button>
+              <button
+                onClick={() => handleSendMessage("How does the regime-flip emergency liquidation work?")}
+                className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.6875rem' }}>
+                "Explain Regime-Flip Exit"
+              </button>
+            </div>
+
+            {/* Input Bar */}
+            <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} style={{ display: 'flex', gap: '0.5rem' }}>
+              <input
+                type="text"
+                value={chatPrompt}
+                onChange={(e) => setChatPrompt(e.target.value)}
+                placeholder="Ask ThetaHawk about portfolio risk, strategy selection, or market state..."
+                style={{
+                  flex: 1,
+                  background: 'var(--bg-root)',
+                  border: '1px solid var(--border-strong)',
+                  borderRadius: '6px',
+                  padding: '0.55rem 0.875rem',
+                  color: 'var(--text-pure)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '0.8125rem',
+                  outline: 'none'
+                }}
+              />
+              <button type="submit" className="btn btn-solid-white" style={{ padding: '0.55rem 1rem' }}>
+                <Icons.Send />
+                Ask Desk
+              </button>
+            </form>
+          </div>
+        )}
       </section>
 
       {/* Floating Demo Control Dock - Precision Monochrome */}
@@ -676,10 +889,10 @@ export default function App() {
         <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center' }}>
           <button
             disabled={isProcessing}
-            onClick={runCycle}
+            onClick={runAgenticCycle}
             className="btn btn-solid-white">
             <Icons.Play />
-            Run Autonomous Cycle
+            Run Agentic Cycle
           </button>
 
           <button

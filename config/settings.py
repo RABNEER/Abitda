@@ -22,6 +22,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 # Trading Configuration
 DEFAULT_SYMBOLS = ["SPY", "QQQ"]
 DATABASE_PATH = BASE_DIR / "thetatrap.sqlite3"
+LIVE_BROKER_EXECUTION = os.getenv("LIVE_BROKER_EXECUTION", "false").lower() == "true"
 
 # Portfolio Risk Caps
 MAX_PORTFOLIO_DELTA = 0.25      # Max absolute aggregate book Delta

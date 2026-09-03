@@ -9,13 +9,14 @@ from datetime import datetime, date, timedelta
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import GetOptionContractsRequest, MarketOrderRequest, LimitOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce, OrderType
-from config.settings import ALPACA_API_KEY, ALPACA_SECRET_KEY, ALPACA_PAPER
+from config.settings import ALPACA_API_KEY, ALPACA_SECRET_KEY, ALPACA_PAPER, LIVE_BROKER_EXECUTION
 
 class AlpacaExecutionEngine:
     def __init__(self):
         self.api_key = ALPACA_API_KEY
         self.secret_key = ALPACA_SECRET_KEY
         self.paper = ALPACA_PAPER
+        self.live_execution = LIVE_BROKER_EXECUTION
         self.client = TradingClient(self.api_key, self.secret_key, paper=self.paper)
 
     def get_account_summary(self) -> Dict[str, Any]:
@@ -27,7 +28,7 @@ class AlpacaExecutionEngine:
                 "cash": float(acct.cash),
                 "buying_power": float(acct.buying_power),
                 "account_number": str(acct.account_number),
-                "status": str(acct.status),
+                "status": str(getattr(acct.status, "value", getattr(acct.status, "name", str(acct.status)))).replace("AccountStatus.", ""),
                 "options_level": int(acct.options_trading_level or 0)
             }
         except Exception as e:
@@ -114,6 +115,11 @@ class AlpacaExecutionEngine:
 
         total_credit = net_credit_per_contract * contracts
 
+        # Live Paper Money Safety Guard:
+        # If live execution is disabled (default), trades run in simulation mode with 0 paper balance risked.
+        execution_venue = "ALPACA_PAPER_BROKER" if self.live_execution else "ALPACA_PAPER_SIMULATION"
+        execution_note = "LIVE ORDER DISPATCHED" if self.live_execution else "SIMULATED FULFILLMENT (Zero Paper Capital Risked)"
+
         # Return execution summary
         receipt = {
             "order_id": f"ord-{symbol.lower()}-{int(datetime.utcnow().timestamp())}",
@@ -125,6 +131,7 @@ class AlpacaExecutionEngine:
             "legs": execution_legs,
             "total_credit_collected": round(total_credit, 2),
             "status": "FILLED",
-            "execution_venue": "ALPACA_PAPER_MCP"
+            "execution_venue": execution_venue,
+            "execution_note": execution_note
         }
         return receipt

@@ -31,7 +31,7 @@ class NarratorAgent:
                     f"No disclaimers, no filler."
                 )
                 res = self.client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.6-flash",
                     contents=prompt
                 )
                 if res and res.text:

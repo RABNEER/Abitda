@@ -11,6 +11,7 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 from core.engine import ThetaHawkEngine
+from agents.copilot_agent import AgenticCoPilot
 from config.settings import (
     MAX_PORTFOLIO_DELTA,
     MAX_PORTFOLIO_VEGA,
@@ -19,7 +20,7 @@ from config.settings import (
 
 app = FastAPI(title="ThetaHawk Options Desk API", version="1.0.0")
 
-# Enable CORS for React Frontend (Vite runs on 5173 by default)
+# Enable CORS for React Frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,10 +30,14 @@ app.add_middleware(
 )
 
 engine = ThetaHawkEngine()
+copilot = AgenticCoPilot(engine)
 
 class CycleRequest(BaseModel):
     symbol: Optional[str] = "SPY"
     force_regime: Optional[str] = None
+
+class ChatRequest(BaseModel):
+    prompt: str
 
 @app.get("/api/health")
 def health_check():
@@ -92,14 +97,27 @@ def execute_cycle(req: CycleRequest):
     res = engine.run_trading_cycle(symbol=req.symbol, force_regime=req.force_regime)
     return res
 
+# --- Agentic ReAct & Co-Pilot Endpoints ---
+
+@app.post("/api/agent/react")
+def run_agentic_react_cycle(symbol: str = Query("SPY")):
+    """Runs a visible, structured ReAct chain of thought for the terminal."""
+    steps = copilot.run_agentic_cycle(symbol=symbol)
+    return {"symbol": symbol, "steps": steps}
+
+@app.post("/api/agent/chat")
+def chat_with_copilot(req: ChatRequest):
+    """Direct Q&A with the ThetaHawk autonomous desk quant."""
+    reply = copilot.ask_copilot(req.prompt)
+    return {"reply": reply, "timestamp": datetime.utcnow().isoformat()}
+
 # --- Hackathon Demo Endpoints ---
 
 @app.post("/api/demo/veto")
 def trigger_demo_veto(symbol: str = "SPY"):
-    """Moment #3: Triggers a Portfolio Greeks limit breach and logs visible VETO event."""
     orig = engine.greeks_gate.max_delta
     try:
-        engine.greeks_gate.max_delta = 0.005 # Force veto
+        engine.greeks_gate.max_delta = 0.005
         res = engine.run_trading_cycle(symbol=symbol)
     finally:
         engine.greeks_gate.max_delta = orig
@@ -107,13 +125,11 @@ def trigger_demo_veto(symbol: str = "SPY"):
 
 @app.post("/api/demo/regime-flip")
 def trigger_demo_regime_flip(symbol: str = "SPY"):
-    """Moment #4: Forces an EVENT_RISK regime shift to demonstrate emergency early liquidation."""
     res = engine.run_trading_cycle(symbol=symbol, force_regime="EVENT_RISK")
     return res
 
 @app.post("/api/demo/suspend")
 def trigger_demo_suspend(symbol: str = "SPY"):
-    """Moment #5: Seeds statistical decay to trigger self-awareness fiduciary lock."""
     for i in range(5):
         engine.ledger.record_trade({
             "id": f"seed-decay-{i}-{int(datetime.utcnow().timestamp())}",
