@@ -32,3 +32,11 @@ logs/
 .idea/
 .vscode/
 *.swp
+
+# Video recordings & temp artifacts
+*.mp4
+*.webm
+demo_recordings/
+demo_recordings*/
+temp_*
+
