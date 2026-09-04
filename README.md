@@ -170,6 +170,45 @@ These are not simulated receipts. These are live broker-accepted orders verified
 
 ---
 
+### 💻 CLI & Autonomous Agent Execution Proof
+
+When installed via `pip install abitda`, running `abitda` in the terminal executes the full 5-step institutional loop on Alpaca Paper Account `PA382FDPI5IO`, auditing portfolio Greeks and dispatching defined-risk spreads:
+
+<div align="center">
+  <br/>
+  <img src="docs/terminal_execution.png" alt="ABITDA CLI Live Execution Proof" width="850"/>
+  <br/><br/>
+</div>
+
+#### How External AI Agents Use ABITDA Programmatically
+
+Any AI agent, LLM framework (LangChain, AutoGen, CrewAI), or quantitative model can plug into the harness in 4 lines:
+
+```python
+from abitda import OptionsAgentProtocol, AgentAction, HarnessEvaluator, ScenarioRegistry
+
+class MyGeminiAgent(OptionsAgentProtocol):
+    @property
+    def name(self) -> str:
+        return "Gemini-VolSurface-Agent"
+
+    def propose_trade(self, telemetry, book_greeks) -> AgentAction:
+        # Candidate agent proposes an options trade
+        return AgentAction(action_type="OPEN", strategy="IRON_CONDOR", confidence=0.92)
+
+# Stress-test candidate agent against the Aug 5, 2024 Yen Crash
+scenario = ScenarioRegistry.get_scenario("aug5_2024")
+scorecard = HarnessEvaluator().evaluate_agent(MyGeminiAgent(), scenario)
+
+# Autonomous fiduciary decision:
+if scorecard.fiduciary_grade == "A+":
+    print("✅ GRADE A+ CERTIFIED — Agent approved for Alpaca execution.")
+else:
+    print(f"🚫 VETOED — Grade {scorecard.fiduciary_grade}: Capital preservation failed.")
+```
+
+---
+
 ## 📊 Harness Scorecard — Aug 5, 2024 Yen Carry Crash
 
 The harness replayed the worst single-day volatility event of 2024 bar-by-bar. Here is what happened to each agent:
