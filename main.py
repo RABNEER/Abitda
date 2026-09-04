@@ -190,9 +190,15 @@ def run_report(symbol: str = "SPY"):
     console.print(f"[bold cyan]Desk Briefing Artifact Successfully Generated: [bold white]DESK_BRIEFING.md[/bold white][/bold cyan]")
     console.print("[dim]Summary: Account Solvency, Macro Regime, Portfolio Greeks Barrier, Committee Debate, and Black Swan Replay exported.[/dim]\n")
 
+def run_test_suite():
+    import test_suite
+    console.print("\n[bold green]>> Executing Abitda 9-Point Verification Suite...[/bold green]")
+    test_suite.run_tests()
+
 def main():
     parser = argparse.ArgumentParser(description="ABITDA: Autonomous Options Agent Test Harness & Trading Desk")
     parser.add_argument("--once", action="store_true", help="Run a single trading cycle")
+    parser.add_argument("--test", action="store_true", help="Run the 9-point end-to-end verification suite")
     parser.add_argument("--dashboard", action="store_true", help="Launch the Streamlit web dashboard")
     parser.add_argument("--benchmark", action="store_true", help="Run Agent Stress-Test Benchmark on market shocks")
     parser.add_argument("--agent", type=str, default="committee", help="Agent candidate for benchmark (committee, vibe, naive_momentum, passive_farmer)")
@@ -206,7 +212,9 @@ def main():
     args = parser.parse_args()
     print_banner()
 
-    if args.benchmark:
+    if args.test:
+        run_test_suite()
+    elif args.benchmark:
         run_benchmark(args.agent, args.scenario)
     elif args.replay:
         run_stress_test()
