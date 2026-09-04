@@ -84,6 +84,27 @@ python -m server
 abitda-mcp
 ```
 
+### 🔑 Bring Your Own Alpaca Account
+
+ABITDA connects directly to **any Alpaca account** (Paper Trading or Live Options Level 3). You can point it to your account in 10 seconds:
+
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Add your keys:
+   ```bash
+   ALPACA_API_KEY="your_alpaca_key"
+   ALPACA_SECRET_KEY="your_alpaca_secret"
+   ALPACA_PAPER="true"                              # Set to "false" for Live Level 3 trading
+   ALPACA_BASE_URL="https://paper-api.alpaca.markets"
+
+   # (Optional) For AI Committee Deliberation
+   GEMINI_API_KEY="your_gemini_key"
+   ```
+
+> **Zero-Config Fallback:** If no API keys are configured, ABITDA automatically runs in an offline simulated paper environment so anyone can stress-test agent logic, inspect portfolio Greeks, and run benchmarks immediately without creating an account.
+
 ```python
 # Or use it programmatically in 4 lines
 from abitda import OptionsAgentProtocol, AgentAction, HarnessEvaluator, ScenarioRegistry
