@@ -1,9 +1,22 @@
-<div align="center">
+﻿<div align="center">
+
+<br/>
 
 # ⚡ ABITDA
+
 ### *Autonomous Options Agent Test Harness & Institutional Risk Desk*
 
-> **The institutional evaluation framework, fiduciary safety layer, and live execution desk for autonomous options trading agents on Alpaca.**
+<br/>
+
+> **The institutional evaluation framework, mathematical risk firewall, and live execution desk  
+> for stress-testing autonomous options trading agents on Alpaca — now available as a Python package.**
+
+<br/>
+
+[![PyPI](https://img.shields.io/badge/pip%20install-abitda-3775A9?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/abitda)
+[![PyPI Version](https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge)](https://pypi.org/project/abitda)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-yellow?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge)](LICENSE)
 
 [![Alpaca Paper Broker](https://img.shields.io/badge/Alpaca%20Account-PA382FDPI5IO-00C805?style=for-the-badge)](https://alpaca.markets)
 [![Options Level 3](https://img.shields.io/badge/Options%20Clearance-Level%203%20Approved-0052CC?style=for-the-badge)](https://alpaca.markets)
@@ -11,17 +24,58 @@
 [![Capital Preserved](https://img.shields.io/badge/Aug5%202024%20Yen%20Crash-99.44%25%20Capital%20Preserved-success?style=for-the-badge)](./HARNESS_SCORECARD.md)
 [![Test Suite](https://img.shields.io/badge/Verification%20Suite-9%2F9%20PASSING-brightgreen?style=for-the-badge)](./test_suite.py)
 [![Live Orders](https://img.shields.io/badge/Alpaca%20Orders-ACCEPTED%20%26%20LIVE-00C805?style=for-the-badge)](https://app.alpaca.markets)
-[![PyPI](https://img.shields.io/badge/PyPI-pip%20install%20abitda-3775A9?style=for-the-badge)](https://pypi.org/project/abitda)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-abitda.up.railway.app-blueviolet?style=for-the-badge)](https://abitda.up.railway.app)
 
 ---
 
 </div>
 
+## 📦 Install the Python Package
+
+```bash
+pip install abitda
+```
+
+That is it. ABITDA is on **PyPI**. One command gives you the full institutional harness, the pluggable agent protocol, the Greeks firewall, and the CLI — no manual setup required.
+
+```bash
+# Verify the installation
+abitda --help
+
+# Run the 9-point end-to-end verification suite
+abitda --test
+
+# Benchmark the Floor Committee against the Aug 5, 2024 Yen crash
+abitda --benchmark --agent committee --scenario aug5_2024
+
+# Launch the institutional web desk (React + FastAPI)
+python -m server
+# Open http://localhost:8000
+
+# Start the MCP server for Claude / Cursor / Gemini CLI
+abitda-mcp
+```
+
+```python
+# Or use it programmatically in 4 lines
+from abitda import OptionsAgentProtocol, AgentAction, HarnessEvaluator, ScenarioRegistry
+
+scenario = ScenarioRegistry.get_scenario("aug5_2024")
+scorecard = HarnessEvaluator().evaluate_agent(MyAgent(), scenario)
+print(scorecard.fiduciary_grade)   # GRADE A+  or  GRADE F (VETOED)
+```
+
+---
+
 ## 💡 What Is ABITDA?
 
-Most hackathon submissions build a trading bot. A bot is just an LLM script with an API key that fires options orders blindly into the market — and blows up the moment volatility spikes.
+Most trading projects build a bot. A bot is an LLM script with an API key that fires options orders into the market — and blows up the moment volatility spikes.
 
 **ABITDA is not a bot. It is the institution that governs bots.**
+
+It is a complete evaluation and execution framework that answers the question every quant needs answered before deploying real capital:
+
+> *"Has this agent been mathematically certified to survive a Black Swan event?"*
 
 ```
   NAIVE BOT:   [LLM says "buy calls"] ────▶ [Unhedged Delta] ────▶ 💥 -42.8% Liquidated
@@ -29,8 +83,8 @@ Most hackathon submissions build a trading bot. A bot is just an LLM script with
   ABITDA:      [Any AI Agent]
                     │
                     ▼
-         [Harness Stress-Tests It Against]
-         [Aug 5, 2024 Yen Crash | Volmageddon | SVB | Flash Crash]
+         [Harness Stress-Tests Against]
+         [Aug 5, 2024 Yen Crash | Volmageddon | SVB | Flash Crash | Bull Grind]
                     │
                     ▼
          [Black-Scholes Greeks Firewall]
@@ -43,8 +97,7 @@ Most hackathon submissions build a trading bot. A bot is just an LLM script with
          [Alpaca Paper Broker PA382FDPI5IO]  ────▶ ✅ Order ACCEPTED
 ```
 
-> Think of ABITDA like **SWE-bench** for quantitative options finance:  
-> a deterministic evaluation harness that tells you, with mathematical certainty, whether an AI agent should be trusted with real broker authority.
+Think of ABITDA like **SWE-bench for quantitative options finance** — a deterministic evaluation harness that tells you, with mathematical certainty, whether an AI agent should be trusted with real broker authority.
 
 ---
 
@@ -78,8 +131,7 @@ These are not simulated receipts. These are live broker-accepted orders verified
 
 ## 📊 Harness Scorecard — Aug 5, 2024 Yen Carry Crash
 
-The harness replayed the worst single-day volatility event of 2024 bar-by-bar.  
-Here is what happened to each agent:
+The harness replayed the worst single-day volatility event of 2024 bar-by-bar. Here is what happened to each agent:
 
 ```text
 ========================================================================================
@@ -128,7 +180,7 @@ flowchart TD
     subgraph EXEC["4 ─ Institutional Execution & Interfaces"]
         E1["Alpaca Paper Broker\nPA382FDPI5IO · $100k · Tier 3"]
         E2["FastMCP Server\nabitda-mcp · 6 quant tools"]
-        E3["Bloomberg React Desk\n+ Streamlit Cloud Console"]
+        E3["Bloomberg React Desk\n+ REST API + Streamlit Console"]
     end
 
     IN --> HARNESS
@@ -243,6 +295,78 @@ Each agent runs on **Google Gemini 2.5 Flash** via `google-genai`. The Risk Gove
 
 ---
 
+## 🌐 Live Demo & Web Desk
+
+**Live URL:** [https://abitda.up.railway.app](https://abitda.up.railway.app)
+
+A full Bloomberg-style institutional React desk, deployed on Railway. Six tabs, zero fluff. Built for quants:
+
+| Tab | What You See |
+|---|---|
+| **Overview** | Account equity · Greeks barrier meters · Win-rate guardian status · Live candlestick chart |
+| **Harness** | Scenario selector → Run benchmark → A+ vs F leaderboard with full scorecard |
+| **Committee** | Live 4-agent floor debate with round-by-round reasoning logs |
+| **Vibe Desk** | NLP prompt → structured defined-risk options legs |
+| **Co-Pilot** | Conversational desk quant (Gemini) — ask anything about the book |
+| **Reports** | Generated DESK_BRIEFING.md with full bar-by-bar audit trail |
+
+---
+
+## 🤖 Agent Gateway — REST API for AI Agents
+
+ABITDA exposes a full **REST API** so any AI agent, LLM system, or orchestration framework can interact with the harness programmatically — no SDK required.
+
+**Base URL:** `https://abitda.up.railway.app/api`
+
+### Core Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/status` | Account health, equity, Greeks snapshot, guardian state |
+| `POST` | `/api/agent/cycle` | Run a full autonomous trade cycle (regime → committee → gate → execute) |
+| `POST` | `/api/harness/run` | Stress-test any agent against a named crash scenario |
+| `GET` | `/api/harness/leaderboard` | Fiduciary scorecard leaderboard for all agents |
+| `GET` | `/api/greeks` | Real-time portfolio Black-Scholes Greeks snapshot |
+| `POST` | `/api/agent/vibe` | NLP prompt → structured defined-risk trade proposal |
+| `POST` | `/api/agent/committee` | Trigger a live 4-agent floor deliberation |
+| `GET` | `/api/agent/copilot` | Ask the Gemini desk quant a question |
+| `GET` | `/api/reports/briefing` | Pull the latest institutional desk briefing |
+
+### Quick Example
+
+```python
+import requests
+
+BASE = "https://abitda.up.railway.app"
+
+# 1. Check account health
+status = requests.get(f"{BASE}/api/status").json()
+print(status["equity"])  # $100,000.00
+
+# 2. Stress-test your agent against the Aug 5 Yen crash
+result = requests.post(f"{BASE}/api/harness/run", json={
+    "agent": "committee",
+    "scenario": "aug5_2024"
+}).json()
+print(result["fiduciary_grade"])  # A+
+
+# 3. Ask the desk quant a question
+answer = requests.get(f"{BASE}/api/agent/copilot", params={
+    "q": "What is the current delta exposure of the book?"
+}).json()
+print(answer["response"])
+```
+
+```bash
+# Or with curl
+curl https://abitda.up.railway.app/api/status | jq .
+curl -X POST https://abitda.up.railway.app/api/harness/run \
+     -H "Content-Type: application/json" \
+     -d '{"agent": "committee", "scenario": "aug5_2024"}'
+```
+
+---
+
 ## 🔌 FastMCP Server — Mount the Harness to Any AI Tool
 
 `mcp_server.py` exposes the entire harness over the **Model Context Protocol**. Plug it into Claude Desktop, Cursor, or any MCP-compatible agent in one step:
@@ -273,6 +397,36 @@ Available MCP tools:
 
 ## ⚡ Quickstart
 
+### Option A — Install from PyPI (Recommended)
+
+```bash
+pip install abitda
+```
+
+Set your environment variables:
+
+```bash
+# .env
+APCA_API_KEY_ID=your_alpaca_key
+APCA_API_SECRET_KEY=your_alpaca_secret
+GEMINI_API_KEY=your_gemini_key
+```
+
+Then run:
+
+```bash
+# Full 9-point verification
+abitda --test
+
+# Benchmark the committee on the Yen crash
+abitda --benchmark --agent committee --scenario aug5_2024
+
+# Launch the web desk
+python -m server
+```
+
+### Option B — Clone the Repository
+
 ```bash
 git clone https://github.com/RABNEER/Abitda.git
 cd Abitda
@@ -280,9 +434,6 @@ pip install -e .
 
 # Run the 9-point end-to-end verification
 python test_suite.py
-
-# Benchmark the floor committee on the Aug 5 2024 Yen crash
-abitda --benchmark --agent committee --scenario aug5_2024
 
 # Launch the institutional web desk
 python server.py
@@ -311,29 +462,6 @@ python server.py
 
 ---
 
-## 🌐 Web Platforms
-
-### Institutional Bloomberg-Style React Desk (`frontend/`)
-
-Six tabs. No fluff. Built for quants:
-
-| Tab | What You See |
-|---|---|
-| **Overview** | Account equity · Greeks barrier meters · Win-rate guardian status |
-| **Harness** | Scenario selector → Run benchmark → A+ vs F leaderboard |
-| **Committee** | Live 4-agent floor debate with round-by-round reasoning logs |
-| **Vibe Desk** | NLP prompt → structured defined-risk options legs |
-| **Co-Pilot** | Conversational desk quant (Gemini) — ask anything about the book |
-| **Reports** | Generated `DESK_BRIEFING.md` with full bar-by-bar audit trail |
-
-### Streamlit Cloud Console (`ui/dashboard.py`)
-
-- Interactive Plotly Black-Scholes payoff curves with live strike sliders
-- "Ask the Desk Quant" AI copilot
-- 5 one-click live demo triggers (Run Cycle · Stress Test · Veto Sim · Regime Flip · Suspend)
-
----
-
 ## 🏆 Alpaca Hackathon Compliance
 
 | Requirement | Implementation | Status |
@@ -342,39 +470,13 @@ Six tabs. No fluff. Built for quants:
 | Options Trading Level 3 | Credit Spreads · Iron Condors · Defined-Risk only | ✅ VERIFIED |
 | Options-Focused Strategy | Black-Scholes Greeks engine · delta-neutral spreads | ✅ COMPLIANT |
 | Multi-Agent Architecture | 4-agent Floor Committee + Vibe Desk NLP structurer | ✅ COMPLIANT |
-| Fiduciary Risk Management | |Δ| ≤ 0.25 · ν ≤ $150 · Regime Exit · Guardian Lock | ✅ COMPLIANT |
+| Fiduciary Risk Management | Δ ≤ 0.25 · ν ≤ $150 · Regime Exit · Guardian Lock | ✅ COMPLIANT |
 | Stress-Testing & Benchmarking | 5 historical crises · Grade A+ vs Grade F leaderboard | ✅ COMPLIANT |
 | Model Context Protocol (MCP) | FastMCP server · 6 institutional quant tools | ✅ COMPLIANT |
+| REST API for AI Agents | Full FastAPI backend · Agent Gateway section | ✅ COMPLIANT |
 | Live Broker Execution Proof | Real orders ACCEPTED on Alpaca (IDs in repo) | ✅ LIVE |
+| PyPI Python Package | `pip install abitda` · v2.0.0 · Apache-2.0 | ✅ PUBLISHED |
 | Public Codebase & Tests | 9/9 automated verification suite · Open-source | ✅ COMPLIANT |
-
----
-
-## 🧾 Live Alpaca Execution Receipts
-
-```text
-========================================================================================
-   ALPACA PAPER BROKER LIVE ORDER VERIFICATION RECEIPT
-   Account: PA382FDPI5IO  |  Equity: $100,000.00  |  Options Level: 3
-========================================================================================
-
- [1]  SPY Options Contract Order
-      Order ID   :  a1b121d3-7a69-49ee-a239-ac04d79f9c29
-      OCC Symbol :  SPY260908C00500000  (Call · Strike $500 · Sep 8 Expiry)
-      Side/Qty   :  BUY 1 Contract  |  Limit: $0.05
-      Status     :  ✅ ACCEPTED — Live in Alpaca matching engine
-      Submitted  :  2026-09-04 10:28:28 UTC
-
- [2]  SPY Equity Benchmark Order
-      Order ID   :  8181e5fb-535c-43f0-9269-ebf5dbc93d65
-      Symbol     :  SPY  |  Side: BUY  |  Qty: 1 Share
-      Status     :  ✅ NEW — Queued in Alpaca paper order book
-      Submitted  :  2026-09-04 10:26:07 UTC
-
-========================================================================================
- Independently verifiable at app.alpaca.markets → Paper Trading → Orders
-========================================================================================
-```
 
 ---
 
@@ -384,7 +486,7 @@ Six tabs. No fluff. Built for quants:
 ABITDA/
 ├── abitda.py                  ← Public Python SDK (pip install abitda)
 ├── mcp_server.py              ← FastMCP server (Claude · Cursor · Gemini CLI)
-├── server.py                  ← FastAPI backend + React static server
+├── server.py                  ← FastAPI backend + React static server + REST API
 ├── test_suite.py              ← 9/9 end-to-end automated verification
 │
 ├── harness/                   ← THE EVALUATION HARNESS
@@ -411,6 +513,10 @@ ABITDA/
 ├── execution/
 │   └── alpaca_client.py       ← Alpaca Paper API · OCC symbol resolver
 │
+├── frontend/                  ← BLOOMBERG-STYLE REACT DESK
+│   └── src/                   ← Vite + TypeScript · 6-tab institutional UI
+│
+├── ui/dashboard.py            ← Streamlit Cloud Console (Plotly payoff curves)
 ├── HARNESS_SCORECARD.md       ← Official A+ attestation (99.1/100)
 └── DESK_BRIEFING.md           ← Institutional desk status report
 ```
@@ -419,9 +525,13 @@ ABITDA/
 
 <div align="center">
 
-**ABITDA — the institution that governs options agents.**  
-*Built for the Alpaca AI Trading Agents Hackathon.*
+**ABITDA — the institution that governs options agents.**
+*Built for the Alpaca AI Trading Agents Hackathon · Apache-2.0 · Python 3.10+*
 
-[github.com/RABNEER/Abitda](https://github.com/RABNEER/Abitda)
+```
+pip install abitda
+```
+
+[github.com/RABNEER/Abitda](https://github.com/RABNEER/Abitda) · [Live Demo](https://abitda.up.railway.app) · [PyPI](https://pypi.org/project/abitda)
 
 </div>
