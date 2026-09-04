@@ -25,16 +25,44 @@
 [![Test Suite](https://img.shields.io/badge/Verification%20Suite-9%2F9%20PASSING-brightgreen?style=for-the-badge)](./test_suite.py)
 [![Live Orders](https://img.shields.io/badge/Alpaca%20Orders-ACCEPTED%20%26%20LIVE-00C805?style=for-the-badge)](https://app.alpaca.markets)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-abitda.up.railway.app-blueviolet?style=for-the-badge)](https://abitda.up.railway.app)
+[![Demo Video](https://img.shields.io/badge/Video%20Walkthrough-2.5m%20Audio%20Demo-E50914?style=for-the-badge&logo=youtube&logoColor=white)](abitda_demo_live_trading.mp4)
 
 ---
 
 </div>
+
+## 🎥 Video Walkthrough (2.5 Min)
+
+<div align="center">
+
+[![Watch Demo Video](https://img.shields.io/badge/▶%20Play%20Video%20Walkthrough-abitda__demo__live__trading.mp4-E50914?style=for-the-badge&logo=youtube&logoColor=white)](abitda_demo_live_trading.mp4)
+
+<video src="abitda_demo_live_trading.mp4" controls="controls" width="100%" style="max-width: 900px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);"></video>
+
+*File:* [`abitda_demo_live_trading.mp4`](abitda_demo_live_trading.mp4) *(1440x900, 30fps with studio voiceover)*
+
+</div>
+
+> **In this walkthrough:**
+> - **0:00 - 0:33**: Institutional Cockpit, Black-Scholes Greeks, and Portfolio Delta/Gamma exposure.
+> - **0:33 - 0:58**: **Live Alpaca Paper Trading Cycle**: Triggering autonomous Options Level 3 execution on account `PA382FDPI5IO` with real-time fill verification.
+> - **0:58 - 1:26**: **Aug 5, 2024 Yen Crash Stress Test**: Replaying a 65% VIX spike, Black-Scholes volatility shocks, and automated fiduciary grading.
+> - **1:26 - 1:52**: **Gemini 2.5 Multi-Agent Deliberation**: Alpha, Risk, Macro, and Math agents debating consensus.
+> - **1:52 - 2:13**: **Natural Language Vibe Compiler**: Compiling conversational trader prompts into mathematical options spreads.
+> - **2:13 - 2:33**: **MCP Protocol & PyPI Package**: FastMCP tools for Claude/Cursor/Gemini agents and audit dossier export.
+
+---
 
 ## 📦 Install the Python Package
 
 ```bash
 pip install abitda
 ```
+
+<div align="center">
+  <img src="docs/terminal_execution.png" alt="Abitda CLI Execution in Terminal" width="100%" style="border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.4);" />
+  <p><em>Autonomous 5-step ReAct loop running in terminal via <code>abitda</code> CLI</em></p>
+</div>
 
 That is it. ABITDA is on **PyPI**. One command gives you the full institutional harness, the pluggable agent protocol, the Greeks firewall, and the CLI — no manual setup required.
 
