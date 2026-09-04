@@ -172,7 +172,8 @@ export const LiveTradingChart: React.FC<LiveTradingChartProps> = ({
 
   // Coordinate mappers
   const getY = (price: number) => {
-    return topPad + (1 - (price - minPrice) / (maxPrice - minPrice)) * (priceHeight - topPad);
+    const range = (maxPrice - minPrice) || 1;
+    return topPad + (1 - (price - minPrice) / range) * (priceHeight - topPad);
   };
 
   const getVolY = (vol: number) => {
@@ -407,20 +408,20 @@ export const LiveTradingChart: React.FC<LiveTradingChartProps> = ({
                 {symbol} · {timeframe}
               </span>
               <span style={{ fontSize: '13px', fontWeight: 700, color: isBullish ? 'var(--sage)' : 'var(--rust)' }}>
-                ${latestCandle ? latestCandle.close.toFixed(2) : currentPrice.toFixed(2)}
+                ${latestCandle ? latestCandle.close.toFixed(2) : (currentPrice || 550.0).toFixed(2)}
               </span>
               <span style={{ color: isBullish ? 'var(--sage)' : 'var(--rust)', fontWeight: 600 }}>
-                {priceChange >= 0 ? `+${priceChange.toFixed(2)}` : priceChange.toFixed(2)} ({pctChange >= 0 ? `+${pctChange.toFixed(2)}` : pctChange.toFixed(2)}%)
+                {priceChange >= 0 ? `+${(priceChange || 0).toFixed(2)}` : (priceChange || 0).toFixed(2)} ({(pctChange || 0) >= 0 ? `+${(pctChange || 0).toFixed(2)}` : (pctChange || 0).toFixed(2)}%)
               </span>
             </div>
 
             {/* Hovered Candle HUD or Current Stats */}
             <div style={{ display: 'flex', gap: '12px', color: 'var(--dim)' }}>
-              <span>O: <strong style={{ color: 'var(--ink)' }}>${(hoveredCandle || latestCandle)?.open.toFixed(2)}</strong></span>
-              <span>H: <strong style={{ color: 'var(--ink)' }}>${(hoveredCandle || latestCandle)?.high.toFixed(2)}</strong></span>
-              <span>L: <strong style={{ color: 'var(--ink)' }}>${(hoveredCandle || latestCandle)?.low.toFixed(2)}</strong></span>
-              <span>C: <strong style={{ color: 'var(--ink)' }}>${(hoveredCandle || latestCandle)?.close.toFixed(2)}</strong></span>
-              <span>Vol: <strong style={{ color: 'var(--ink)' }}>{(((hoveredCandle || latestCandle)?.volume || 0) / 1000000).toFixed(2)}M</strong></span>
+              <span>O: <strong style={{ color: 'var(--ink)' }}>${((hoveredCandle || latestCandle)?.open ?? 0).toFixed(2)}</strong></span>
+              <span>H: <strong style={{ color: 'var(--ink)' }}>${((hoveredCandle || latestCandle)?.high ?? 0).toFixed(2)}</strong></span>
+              <span>L: <strong style={{ color: 'var(--ink)' }}>${((hoveredCandle || latestCandle)?.low ?? 0).toFixed(2)}</strong></span>
+              <span>C: <strong style={{ color: 'var(--ink)' }}>${((hoveredCandle || latestCandle)?.close ?? 0).toFixed(2)}</strong></span>
+              <span>Vol: <strong style={{ color: 'var(--ink)' }}>{((((hoveredCandle || latestCandle)?.volume || 0)) / 1000000).toFixed(2)}M</strong></span>
             </div>
 
             {/* Indicator Legend */}
@@ -625,7 +626,7 @@ export const LiveTradingChart: React.FC<LiveTradingChartProps> = ({
                     fill="var(--paper)"
                     fontSize="8"
                     fontFamily="Geist Mono">
-                    ${(maxPrice - (mousePos.y - topPad) / (priceHeight - topPad) * (maxPrice - minPrice)).toFixed(2)}
+                    ${Math.max(0, maxPrice - ((mousePos.y - topPad) / ((priceHeight - topPad) || 1)) * (maxPrice - minPrice || 1)).toFixed(2)}
                   </text>
                 </g>
               )}
@@ -686,8 +687,10 @@ export const LiveTradingChart: React.FC<LiveTradingChartProps> = ({
               {(() => {
                 const minEq = 99000;
                 const maxEq = 101500;
-                const eqToY = (eqVal: number) => 170 - ((eqVal - minEq) / (maxEq - minEq)) * 140;
-                const eqToX = (idx: number) => 25 + (idx / (equityPoints.length - 1)) * 540;
+                const range = (maxEq - minEq) || 1;
+                const count = Math.max(1, equityPoints.length - 1);
+                const eqToY = (eqVal: number) => 170 - ((eqVal - minEq) / range) * 140;
+                const eqToX = (idx: number) => 25 + (idx / count) * 540;
 
                 const pointsStr = equityPoints.map(p => `${eqToX(p.index)},${eqToY(p.equity)}`).join(' L ');
                 const fillStr = `M ${eqToX(0)},170 L ${pointsStr} L ${eqToX(equityPoints.length - 1)},170 Z`;

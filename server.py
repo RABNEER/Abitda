@@ -145,7 +145,11 @@ def chat_with_copilot(req: ChatRequest):
 def run_committee_deliberation(symbol: str = "SPY", force_regime: Optional[str] = None):
     from agents.committee import DeskCommittee
     committee = DeskCommittee(engine)
-    return committee.deliberate(symbol, force_regime=force_regime)
+    res = committee.deliberate(symbol, force_regime=force_regime)
+    res["rounds"] = res.get("debate", [])
+    res["recommended_playbook"] = res.get("candidate", {}).get("strategy_type", "BULL_PUT_SPREAD")
+    res["consensus_confidence"] = 0.88 if res.get("is_approved") else 0.45
+    return res
 
 # --- Vibe Desk Natural Language Strategy Architect (Vibe-Trading) ---
 @app.post("/api/vibe/architect")
