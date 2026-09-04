@@ -294,39 +294,84 @@ Open **`http://localhost:8000`** in your browser.
 | **Dedicated Alpaca Paper Account** | Account ID: `PA382FDPI5IO` ($100,000 Starting Equity) | **COMPLIANT** |
 | **Approved Options Trading Tier** | Level 3 (Credit Spreads, Debit Spreads, Iron Condors, Defined Risk) | **COMPLIANT** |
 | **Options-Focused Strategy** | Black-Scholes Greeks engine, delta-neutral spreads, dynamic volatility sizing | **COMPLIANT** |
-| **Multi-Agent Architecture** | 4-Agent Floor Committee (Macro, Technical, Alpha, Risk) + Vibe Desk | **COMPLIANT** |
+| **Multi-Agent Architecture** | 4-Agent Floor Committee (Macro, Greeks, Volatility, Fiduciary) + Vibe Desk | **COMPLIANT** |
 | **Fiduciary Risk Management** | Portfolio Greeks limits (|Δ| ≤ 0.25, ν ≤ 150), Regime-Flip Exit, Guardian Lock | **COMPLIANT** |
-| **Stress-Testing & Benchmarking** | 5 Historical Crisis Scenarios (Yen Crash, SVB, Volmageddon, Flash Crash) | **COMPLIANT** |
+| **Stress-Testing & Benchmarking** | 5 Historical Crisis Scenarios (Yen Crash, SVB, Volmageddon, Flash Crash, Calm Grind) | **COMPLIANT** |
 | **Model Context Protocol (MCP)** | Native FastMCP Server (`mcp_server.py`) with 5 institutional quant tools | **COMPLIANT** |
-| **Public Codebase & Tests** | Open-source GitHub repository with 9/9 passing automated verification tests | **COMPLIANT** |
+| **Public Codebase & Tests** | Open-source GitHub repository with passing automated verification suites | **COMPLIANT** |
+
+---
+
+## 📦 PyPI Package & Publishing
+
+`abitda` is packaged as an institutional Python package:
+
+```bash
+# Install via pip
+pip install abitda
+
+# Verify installation & launch CLI
+abitda --help
+
+# Run Black Swan benchmark against Yen Carry Crash
+abitda --benchmark --agent committee --scenario aug5_2024
+```
+
+### Publishing to PyPI
+```bash
+# 1. Build source distribution and wheel
+python -m build
+
+# 2. Check distribution integrity with twine
+twine check dist/*
+
+# 3. Upload to TestPyPI (optional test)
+twine upload --repository testpypi dist/*
+
+# 4. Upload to Production PyPI
+twine upload dist/*
+```
+
+---
+
+## 📖 Developer & Agent Integration Guide
+
+Want to benchmark your own custom trading agent (LangChain, AutoGen, CrewAI, or rule-based) against Abitda's Black Swan crucibles?
+
+👉 **[Read the Full Harness Integration Guide](./docs/HARNESS_INTEGRATION_GUIDE.md)**
 
 ---
 
 ## 📂 Repository Organization
 
 ```text
-├── abitda.py                   # Unified CLI entrypoint for harness & desk
+├── abitda.py                   # Top-level SDK module
+├── main.py                     # CLI entrypoint for harness & desk
 ├── mcp_server.py               # FastMCP Server exposing harness tools
 ├── server.py                   # High-performance FastAPI backend + static React server
 ├── test_suite.py               # 9/9 End-to-end automated verification suite
+├── extreme_test_suite.py       # Stress, chaos & adversarial fuzzing suite
+├── pyproject.toml              # PyPI package build configuration
+├── setup.py                    # Package metadata & entry points
 ├── SUBMISSION.md               # Official Hackathon Submission Dossier & Demo Script
 ├── HARNESS_SCORECARD.md        # Full benchmark scorecards across historical crises
 ├── DESK_BRIEFING.md            # Generated institutional quant daily risk dossier
+├── docs/
+│   └── HARNESS_INTEGRATION_GUIDE.md # Comprehensive external agent integration guide
 ├── harness/                    # 🛡️ THE AGENT TEST HARNESS SUITE
 │   ├── protocol.py             # Standardized AgentProtocol & 4 pre-built adapters
 │   ├── scenarios.py            # 5 Historical Black Swan market shock scenarios
 │   └── evaluator.py            # Fiduciary grading engine & leaderboard compiler
 ├── agents/                     # 👥 MULTI-AGENT ARCHITECTURE
-│   ├── committee.py            # 4-Agent Floor Committee (Macro, Tech, Alpha, Risk)
-│   ├── vibe_desk.py            # NLP Sentiment Structurer (inspired by HKUDS)
+│   ├── committee.py            # 4-Agent Floor Committee (Macro, Greeks, Volatility, Fiduciary)
+│   ├── vibe_desk.py            # NLP Sentiment Structurer
 │   ├── copilot_agent.py        # Conversational ReAct Desk Copilot
-│   ├── regime_agent.py         # Macro regime classification & strategy selector
-│   └── narrator.py             # Human-readable trade audit narrator
+│   └── regime_agent.py         # Macro regime classification & strategy selector
 ├── risk/                       # ⚖️ MATHEMATICAL RISK FIREWALL
 │   ├── portfolio_greeks_gate.py# Analytical Black-Scholes Delta & Vega limit gate
 │   ├── hard_backstops.py       # Capital allocation and daily drawdown breakers
-│   ├── guardian.py             # Statistical win-rate self-suspension engine
-│   └── sizing.py               # Dynamic volatility-adjusted position sizer
+│   ├── self_suspension.py      # Statistical win-rate self-suspension engine
+│   └── regime_flip_exit.py     # Tail-risk emergency liquidation monitor
 ├── data/                       # 📈 MARKET DATA & TELEMETRY
 │   ├── market_reader.py        # VIX, IV percentile, and realized volatility reader
 │   ├── greeks_engine.py        # Closed-form Black-Scholes calculus & spread Greeks
@@ -335,15 +380,12 @@ Open **`http://localhost:8000`** in your browser.
 │   └── alpaca_client.py        # Alpaca Paper API client with safety guards
 ├── memory/                     # 💾 AUDIT & LEDGER
 │   └── trade_logger.py         # SQLite3 immutable audit trail & ledger
-├── ui/                         # 📊 STREAMLIT CONSOLE
-│   └── dashboard.py            # Interactive Streamlit desk with payoff curves
 └── frontend/                   # 🖥️ INSTITUTIONAL REACT TERMINAL
-    ├── src/App.tsx             # 6-tab Bloomberg-style React trading console
-    └── dist/                   # Production-compiled static assets
+    ├── src/components/         # LiveTradingChart, GreeksRiskMeter, BenchmarkComparisonChart
+    └── src/App.tsx             # Multi-page sidebar institutional console
 ```
-
----
 
 <div align="center">
   <b>Built with mathematical rigor for the Alpaca AI Trading Agents Hackathon.</b>
 </div>
+

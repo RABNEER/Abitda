@@ -1,4 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { LiveTradingChart } from './components/LiveTradingChart';
+import { GreeksRiskMeter } from './components/GreeksRiskMeter';
+import { BenchmarkComparisonChart } from './components/BenchmarkComparisonChart';
+
 
 // Custom Minimalist SVG Icons
 const Icons = {
@@ -747,40 +751,19 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Payoff Profile & Fiduciary Controls (1px Grid) */}
-              <div className="card-grid" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
+              {/* Primary Live Trading Chart & Fiduciary Controls (1px Grid) */}
+              <div className="card-grid" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
                 
-                <div className="card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span className="label">STRATEGY PAYOFF PROFILE</span>
-                    <span className="mode-pill mode-sage">{telemetry?.regime.recommended_playbook || "IRON_CONDOR"}</span>
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <LiveTradingChart
+                    symbol={symbol}
+                    currentPrice={telemetry?.telemetry.price || (symbol === 'SPY' ? 550.0 : 480.0)}
+                    vix={telemetry?.telemetry.vix || 14.32}
+                    recommendedPlaybook={telemetry?.regime.recommended_playbook || "IRON_CONDOR"}
+                    equity={status?.equity || 100000}
+                  />
 
-                  {/* SVG Risk Diagram */}
-                  <div style={{ background: 'var(--paper2)', border: '1px solid var(--border)', padding: '16px' }}>
-                    <svg viewBox="0 0 500 130" style={{ width: '100%', height: '110px', display: 'block' }}>
-                      <line x1="20" y1="75" x2="480" y2="75" stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
-                      <text x="485" y="78" fill="var(--dim)" fontSize="8" fontFamily="Geist Mono">P&L $0</text>
-
-                      <polygon points="120,75 160,35 340,35 380,75" fill="rgba(61, 90, 71, 0.15)" />
-                      <polygon points="40,115 120,75 40,75" fill="rgba(139, 58, 42, 0.12)" />
-                      <polygon points="380,75 460,115 460,75" fill="rgba(139, 58, 42, 0.12)" />
-
-                      <path d="M 40 115 L 120 75 L 160 35 L 340 35 L 380 75 L 460 115" fill="none" stroke="var(--ink)" strokeWidth="2" />
-
-                      <line x1="250" y1="20" x2="250" y2="115" stroke="var(--gold)" strokeWidth="1.5" strokeDasharray="2 2" />
-                      <circle cx="250" cy="35" r="4" fill="var(--paper)" stroke="var(--gold)" strokeWidth="2" />
-                      <text x="250" y="16" textAnchor="middle" fill="var(--gold)" fontSize="9" fontWeight="600" fontFamily="Geist Mono">
-                        Spot ${telemetry?.telemetry.price.toFixed(0) || "550"}
-                      </text>
-
-                      <text x="160" y="92" textAnchor="middle" fill="var(--dim)" fontSize="8" fontFamily="Geist Mono">Lower Wing</text>
-                      <text x="340" y="92" textAnchor="middle" fill="var(--dim)" fontSize="8" fontFamily="Geist Mono">Upper Wing</text>
-                      <text x="250" y="58" textAnchor="middle" fill="var(--sage)" fontSize="9" fontWeight="600" fontFamily="Geist Mono">+Theta Zone</text>
-                    </svg>
-                  </div>
-
-                  <div style={{ marginTop: '16px', background: 'var(--paper2)', borderLeft: '2px solid var(--gold)', padding: '12px 16px' }}>
+                  <div style={{ background: 'var(--paper2)', border: '1px solid var(--border)', borderLeft: '3px solid var(--gold)', padding: '12px 16px' }}>
                     <div className="label" style={{ color: 'var(--gold)', marginBottom: '4px' }}>
                       AI Market Regime Telemetry
                     </div>
@@ -790,7 +773,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '14px' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <span className="label">FIDUCIARY ENFORCEMENT</span>
@@ -799,7 +782,19 @@ export default function App() {
                       </button>
                     </div>
 
-                    <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', lineHeight: 1.6, marginBottom: '16px' }}>
+                    {/* Live Greeks Risk Barometer */}
+                    <div style={{ marginBottom: '14px' }}>
+                      <GreeksRiskMeter
+                        netDelta={delta}
+                        maxDelta={maxDelta}
+                        netVega={status?.book_greeks.net_vega || 0.0}
+                        maxVega={status?.limits.max_vega || 150.0}
+                        netTheta={status?.book_greeks.net_theta || 0.0}
+                        isSuspended={status?.guardian.is_suspended || false}
+                      />
+                    </div>
+
+                    <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', lineHeight: 1.6, marginBottom: '14px' }}>
                       Simulate real-world market failure modes and observe Abitda's autonomous risk barriers intercepting violations:
                     </p>
 
@@ -821,7 +816,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
                     <span className="label">Broker State</span>
                     <span className="label" style={{ color: 'var(--sage)' }}>Ready for execution</span>
                   </div>
@@ -1055,8 +1050,58 @@ export default function App() {
               {harnessScorecard && harnessScorecard.timeline && (
                 <div className="card" style={{ padding: 0 }}>
                   <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="label">BAR-BY-BAR REPLAY EXECUTION TIMELINE</span>
+                    <span className="label">BAR-BY-BAR REPLAY EXECUTION TIMELINE & SHOCK TRAJECTORY</span>
                     <span className="label">{harnessScorecard.timeline.length} BARS EVALUATED</span>
+                  </div>
+
+                  {/* Visual Shock Trajectory Graph */}
+                  <div style={{ padding: '16px 20px', background: 'var(--paper2)', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span className="label" style={{ color: 'var(--gold)' }}>HISTORICAL CRASH & EQUITY TRAJECTORY</span>
+                      <div style={{ display: 'flex', gap: '14px', fontSize: '9px', fontFamily: 'Geist Mono, monospace' }}>
+                        <span style={{ color: 'var(--gold)', fontWeight: 600 }}>— Spot Price Shock</span>
+                        <span style={{ color: 'var(--sage)', fontWeight: 600 }}>— Portfolio Equity</span>
+                        <span style={{ color: 'var(--rust)', fontWeight: 600 }}>● VIX Spike (&gt;35)</span>
+                      </div>
+                    </div>
+                    <div style={{ height: '110px', width: '100%' }}>
+                      <svg viewBox="0 0 600 100" style={{ width: '100%', height: '100%', display: 'block' }}>
+                        {(() => {
+                          const tl = harnessScorecard.timeline;
+                          if (!tl || tl.length === 0) return null;
+                          const spyVals = tl.map((r: any) => r.spy);
+                          const eqVals = tl.map((r: any) => r.equity);
+                          const minSpy = Math.min(...spyVals);
+                          const maxSpy = Math.max(...spyVals);
+                          const minEq = Math.min(...eqVals, 80000);
+                          const maxEq = Math.max(...eqVals, 101000);
+
+                          const getX = (idx: number) => 30 + (idx / (tl.length - 1 || 1)) * 540;
+                          const getSpyY = (val: number) => 85 - ((val - minSpy) / (maxSpy - minSpy || 1)) * 65;
+                          const getEqY = (val: number) => 85 - ((val - minEq) / (maxEq - minEq || 1)) * 65;
+
+                          const spyPath = tl.map((r: any, i: number) => `${getX(i)},${getSpyY(r.spy)}`).join(' L ');
+                          const eqPath = tl.map((r: any, i: number) => `${getX(i)},${getEqY(r.equity)}`).join(' L ');
+
+                          return (
+                            <>
+                              <line x1="20" y1="50" x2="580" y2="50" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="3 3" />
+                              <path d={`M ${spyPath}`} fill="none" stroke="var(--gold)" strokeWidth="2" strokeDasharray="4 2" />
+                              <path d={`M ${eqPath}`} fill="none" stroke={harnessScorecard.capital_preserved_pct >= 95 ? 'var(--sage)' : 'var(--rust)'} strokeWidth="2.5" />
+                              {tl.map((r: any, i: number) => (
+                                <g key={i}>
+                                  <circle cx={getX(i)} cy={getSpyY(r.spy)} r="3" fill="var(--gold)" />
+                                  <circle cx={getX(i)} cy={getEqY(r.equity)} r="3.5" fill="var(--paper)" stroke={r.pnl >= 0 ? 'var(--sage)' : 'var(--rust)'} strokeWidth="2" />
+                                  {r.vix > 35 && (
+                                    <circle cx={getX(i)} cy="15" r="3" fill="var(--rust)" />
+                                  )}
+                                </g>
+                              ))}
+                            </>
+                          );
+                        })()}
+                      </svg>
+                    </div>
                   </div>
 
                   <div style={{ overflowX: 'auto' }}>
@@ -1105,6 +1150,9 @@ export default function App() {
                   </div>
                 </div>
               )}
+
+              {/* Visual Cross-Agent Benchmark Comparison Bar Chart */}
+              <BenchmarkComparisonChart scenarioName={harnessScorecard?.scenario_name || "August 5, 2024 Yen Carry Crash"} />
 
               {/* Comparative Multi-Agent Leaderboard */}
               {harnessLeaderboard && (

@@ -39,4 +39,4 @@ thetahawk-mcp = "mcp_server:main"
 
 [tool.setuptools]
 packages = ["harness", "agents", "config", "core", "data", "execution", "memory", "risk", "ui", "reports"]
-py-modules = ["main", "server", "mcp_server", "test_suite"]
+py-modules = ["abitda", "main", "server", "mcp_server", "test_suite"]

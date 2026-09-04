@@ -134,6 +134,9 @@ def ask_desk_quant(question: str) -> str:
     reply = engine.copilot.ask_copilot(question)
     return reply
 
-if __name__ == "__main__":
+def main():
     # Runs standard stdio MCP transport for Claude Desktop / Cursor / Gemini
     mcp.run(transport="stdio")
+
+if __name__ == "__main__":
+    main()
