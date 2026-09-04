@@ -1,5 +1,5 @@
 """
-ThetaHawk Core Engine & Orchestrator
+Abitda Core Engine & Orchestrator
 Executes the full 5-Step Trader Loop with fiduciary risk controls:
 1. Regime Reader
 2. Opportunity Scanner
@@ -25,7 +25,7 @@ from execution.alpaca_client import AlpacaExecutionEngine
 from memory.trade_logger import TradeLedger
 from agents.copilot_agent import AgenticCoPilot
 
-class ThetaHawkEngine:
+class AbitdaEngine:
     def __init__(self):
         self.market_reader = MarketReader()
         self.regime_agent = RegimeAgent()
@@ -234,3 +234,7 @@ class ThetaHawkEngine:
             "cycle_log": cycle_log,
             "telemetry": telemetry
         }
+
+# Backwards compatibility alias
+ThetaHawkEngine = AbitdaEngine
+

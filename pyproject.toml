@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abitda"
+version = "2.0.0"
+description = "Abitda: Autonomous Options Agent Test Harness & Institutional Desk for Alpaca"
+readme = "README.md"
+authors = [
+    { name = "Abitda Contributors" }
+]
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+dependencies = [
+    "alpaca-py>=0.21.0",
+    "pandas>=2.1.0",
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+    "yfinance>=0.2.36",
+    "streamlit>=1.32.0",
+    "python-dotenv>=1.0.0",
+    "apscheduler>=3.10.4",
+    "anthropic>=0.20.0",
+    "google-genai>=0.1.0",
+    "openai>=1.14.0",
+    "rich>=13.7.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "plotly>=5.19.0",
+    "mcp>=1.0.0"
+]
+
+[project.scripts]
+abitda = "main:main"
+abitda-mcp = "mcp_server:main"
+thetahawk = "main:main"
+thetahawk-mcp = "mcp_server:main"
+
+[tool.setuptools]
+packages = ["harness", "agents", "config", "core", "data", "execution", "memory", "risk", "ui", "reports"]
+py-modules = ["main", "server", "mcp_server", "test_suite"]

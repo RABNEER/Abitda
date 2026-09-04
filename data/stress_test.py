@@ -86,6 +86,13 @@ class BlackSwanStressTest:
                     "drawdown_pct": naive_drawdown_pct,
                     "outcome": "Catastrophic Tail Blowout (-43.8%)"
                 },
+                "abitda": {
+                    "final_equity": hawk_final_equity,
+                    "total_loss": final_tick["thetahawk_pnl"],
+                    "drawdown_pct": hawk_drawdown_pct,
+                    "capital_preserved_pct": (hawk_final_equity / self.starting_equity) * 100.0,
+                    "outcome": "Defensive Early Scratch (-1.24% saved $42,560)"
+                },
                 "thetahawk": {
                     "final_equity": hawk_final_equity,
                     "total_loss": final_tick["thetahawk_pnl"],
@@ -96,7 +103,7 @@ class BlackSwanStressTest:
             },
             "institutional_summary": (
                 "While naive bots hold short options into high-volatility tail expansions, "
-                "ThetaHawk's Regime-Flip Early Exit senses macro VIX shocks immediately, "
+                "Abitda's Regime-Flip Early Exit senses macro VIX shocks immediately, "
                 "scratching trades for -1.2% and preserving 98.8% of portfolio equity."
             )
         }

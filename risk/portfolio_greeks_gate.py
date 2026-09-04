@@ -62,3 +62,17 @@ class PortfolioGreeksGate:
             f"Net Daily Theta: +${projected_theta:.2f}"
         )
         return True, reason, projected
+
+    def audit_trade(self, current_book_greeks: Dict[str, float], proposed_delta: float, proposed_vega: float) -> Dict[str, Any]:
+        """Convenience method returning structured audit decision."""
+        approved, reason, projected = self.evaluate_new_trade(
+            current_book_greeks,
+            {"net_delta": proposed_delta, "net_vega": proposed_vega, "net_theta": 0.0}
+        )
+        return {
+            "is_approved": approved,
+            "reason": reason,
+            "projected_delta": projected["net_delta"],
+            "projected_vega": projected["net_vega"]
+        }
+

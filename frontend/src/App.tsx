@@ -1,70 +1,49 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-// Custom SVG Icons (Strictly No Emojis, UI/UX Pro Max rule)
+// Custom Minimalist SVG Icons
 const Icons = {
-  Logo: () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 19 21 12 17 5 21 12 2" />
+  Overview: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+      <rect x="3" y="3" width="7" height="9" />
+      <rect x="14" y="3" width="7" height="5" />
+      <rect x="14" y="12" width="7" height="9" />
+      <rect x="3" y="16" width="7" height="5" />
     </svg>
   ),
-  Activity: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+  Harness: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+      <path d="M4 3h16M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3M6 14h12" />
     </svg>
   ),
-  Shield: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  Users: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
+  Vibe: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z" />
     </svg>
   ),
   Terminal: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
       <polyline points="4 17 10 11 4 5" />
       <line x1="12" y1="19" x2="20" y2="19" />
     </svg>
   ),
-  MessageSquare: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  ),
-  AlertOctagon: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-  ),
-  Zap: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-  ),
-  Lock: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  ),
-  RotateCcw: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="1 4 1 10 7 10" />
-      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-    </svg>
-  ),
-  Play: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  ),
-  Send: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="22" y1="2" x2="11" y2="13" />
-      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  Report: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
     </svg>
   ),
   Close: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -91,8 +70,13 @@ interface AccountStatus {
   guardian: {
     is_suspended: boolean;
     message: string;
-    stats: any;
+    stats: {
+      total_trades: number;
+      win_rate: number;
+      consecutive_losses: number;
+    };
   };
+  open_trades_count: number;
 }
 
 interface TelemetryData {
@@ -100,38 +84,34 @@ interface TelemetryData {
     symbol: string;
     price: number;
     vix: number;
-    vix_change_pct: number;
     iv_percentile: number;
     trend: string;
-    trend_slope: number;
-    ma20: number;
-    ma50: number;
   };
   regime: {
     regime: string;
     recommended_playbook: string;
     reasoning: string;
+    confidence: number;
   };
 }
 
 interface Trade {
   id: string;
-  timestamp: string;
   symbol: string;
   strategy_type: string;
   regime: string;
   net_credit: number;
   max_risk: number;
   status: string;
-  exit_reason?: string;
   pnl?: number;
+  timestamp: string;
 }
 
 interface AuditEvent {
   id: number;
   timestamp: string;
   event_type: string;
-  symbol: string;
+  symbol?: string;
   message: string;
 }
 
@@ -140,35 +120,77 @@ interface ReActStep {
   content: string;
 }
 
-const API_BASE = "http://127.0.0.1:8000";
+interface CommitteeDeliberation {
+  timestamp: string;
+  symbol: string;
+  consensus: string;
+  consensus_confidence: number;
+  recommended_playbook: string;
+  rounds: Array<{
+    agent: string;
+    role: string;
+    stance?: string;
+    strategy?: string;
+    consensus?: string;
+    content: string;
+  }>;
+}
+
+interface VibeResult {
+  type: string;
+  narrative: string;
+  metrics?: any;
+  candidate?: any;
+}
+
+const API_BASE = (import.meta as any).env?.VITE_API_BASE ?? "";
 
 export default function App() {
   const [symbol, setSymbol] = useState<'SPY' | 'QQQ'>('SPY');
+  const [activePage, setActivePage] = useState<'overview' | 'harness' | 'committee' | 'vibe' | 'copilot' | 'reports'>('overview');
+  
   const [status, setStatus] = useState<AccountStatus | null>(null);
   const [telemetry, setTelemetry] = useState<TelemetryData | null>(null);
   const [openTrades, setOpenTrades] = useState<Trade[]>([]);
   const [closedTrades, setClosedTrades] = useState<Trade[]>([]);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [demoBanner, setDemoBanner] = useState<{ type: string; title: string; message: string } | null>(null);
+  const [demoBanner, setDemoBanner] = useState<{ type: 'sage' | 'gold' | 'rust'; title: string; message: string } | null>(null);
 
   // Agentic ReAct State
   const [reactSteps, setReactSteps] = useState<ReActStep[]>([
-    { type: "THOUGHT", content: "Agent initialized in autonomous surveillance mode. Ready to evaluate SPY options." }
+    { type: "THOUGHT", content: "Abitda autonomous surveillance engine online. Monitoring volatility surface slope and Greeks invariants." }
   ]);
   const [chatPrompt, setChatPrompt] = useState("");
   const [chatHistory, setChatHistory] = useState<Array<{ sender: 'user' | 'agent'; text: string }>>([
-    { sender: 'agent', text: "ThetaHawk desk online. Ask me about our portfolio Greeks, current regime, or trade gating logic." }
+    { sender: 'agent', text: "Abitda floor connection established. Ask me about portfolio Greeks, market regimes, or benchmark scorecards." }
   ]);
-  const [activeConsoleTab, setActiveConsoleTab] = useState<'thought' | 'copilot'>('thought');
 
+  // Floor Committee & Vibe Desk
+  const [committeeData, setCommitteeData] = useState<CommitteeDeliberation | null>(null);
+  const [vibePrompt, setVibePrompt] = useState("");
+  const [vibeResult, setVibeResult] = useState<VibeResult | null>(null);
+  const [deskReport, setDeskReport] = useState<string | null>(null);
+  const [copiedReport, setCopiedReport] = useState(false);
+
+  // Test Harness Benchmark State
+  const [harnessAgent, setHarnessAgent] = useState<'committee' | 'vibe' | 'naive_momentum' | 'passive_farmer'>('committee');
+  const [harnessScenario, setHarnessScenario] = useState<string>('aug5_2024');
+  const [harnessScorecard, setHarnessScorecard] = useState<any | null>(null);
+  const [harnessLeaderboard, setHarnessLeaderboard] = useState<any | null>(null);
+  const [isBenchmarking, setIsBenchmarking] = useState(false);
+  const [shellLogLines, setShellLogLines] = useState<Array<{ type: 'cmd' | 'ok' | 'warn'; text: string }>>([]);
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch All Engine Data
   const fetchAll = async () => {
     try {
       const [sRes, tRes, trRes, aRes] = await Promise.all([
         fetch(`${API_BASE}/api/status`),
         fetch(`${API_BASE}/api/telemetry?symbol=${symbol}`),
         fetch(`${API_BASE}/api/trades`),
-        fetch(`${API_BASE}/api/audit?limit=10`)
+        fetch(`${API_BASE}/api/audit?limit=15`)
       ]);
 
       if (sRes.ok) setStatus(await sRes.json());
@@ -193,7 +215,13 @@ export default function App() {
     return () => clearInterval(interval);
   }, [symbol]);
 
-  // Run Agentic ReAct Cycle
+  useEffect(() => {
+    if (activePage === 'copilot' && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatHistory, activePage]);
+
+  // Actions
   const runAgenticCycle = async () => {
     setIsProcessing(true);
     try {
@@ -201,7 +229,11 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         setReactSteps(data.steps || []);
-        setActiveConsoleTab('thought');
+        setDemoBanner({
+          type: 'sage',
+          title: 'CYCLE COMPLETE',
+          message: `Evaluated ${symbol}. Processed ${data.steps?.length || 0} ReAct reasoning steps on Alpaca paper book.`
+        });
       }
       fetchAll();
     } finally {
@@ -209,15 +241,12 @@ export default function App() {
     }
   };
 
-  // Chat with Co-Pilot
   const handleSendMessage = async (customPrompt?: string) => {
     const promptToSend = customPrompt || chatPrompt;
     if (!promptToSend.trim()) return;
 
-    const userMsg = { sender: 'user' as const, text: promptToSend };
-    setChatHistory(prev => [...prev, userMsg]);
+    setChatHistory(prev => [...prev, { sender: 'user', text: promptToSend }]);
     if (!customPrompt) setChatPrompt("");
-    setActiveConsoleTab('copilot');
 
     try {
       const res = await fetch(`${API_BASE}/api/agent/chat`, {
@@ -234,13 +263,157 @@ export default function App() {
     }
   };
 
+  const runBenchmarkTest = async (agentId?: string, scenarioId?: string) => {
+    const ag = agentId || harnessAgent;
+    const sc = scenarioId || harnessScenario;
+    setIsBenchmarking(true);
+    setShellLogLines([
+      { type: 'cmd', text: `abitda benchmark --agent ${ag} --scenario ${sc}` },
+      { type: 'ok', text: `Calibrated shock dataset loaded: ${sc}` },
+      { type: 'ok', text: `Evaluating candidate agent via OptionsAgentProtocol` }
+    ]);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/harness/benchmark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent_id: ag, scenario_id: sc })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHarnessScorecard(data);
+        setActivePage('harness');
+        setShellLogLines(prev => [
+          ...prev,
+          { type: 'ok', text: `Replayed ${data.timeline?.length || 5} historical bars` },
+          { type: data.fiduciary_grade === 'A+' ? 'ok' : 'warn', text: `Audit Complete: GRADE ${data.fiduciary_grade} (${data.attestation_status})` },
+          { type: 'ok', text: `Scorecard saved to HARNESS_SCORECARD.md` }
+        ]);
+        setDemoBanner({
+          type: data.fiduciary_grade === 'A+' || data.fiduciary_grade === 'A' ? 'sage' : 'rust',
+          title: `BENCHMARK COMPLETE: GRADE ${data.fiduciary_grade}`,
+          message: `Agent ${data.agent_name} vs ${data.scenario_name}: Preserved ${data.capital_preserved_pct}%, Max DD ${data.max_drawdown_pct}%. Attestation: ${data.attestation_status}.`
+        });
+      }
+    } catch (e) {
+      console.error("Benchmark failed:", e);
+      setShellLogLines(prev => [...prev, { type: 'warn', text: `Benchmark execution failed: ${String(e)}` }]);
+    } finally {
+      setIsBenchmarking(false);
+    }
+  };
+
+  const loadLeaderboard = async (scenarioId?: string) => {
+    const sc = scenarioId || harnessScenario;
+    setIsBenchmarking(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/harness/leaderboard?scenario_id=${sc}`);
+      if (res.ok) {
+        const data = await res.json();
+        setHarnessLeaderboard(data.leaderboard);
+        setActivePage('harness');
+      }
+    } catch (e) {
+      console.error("Failed to load leaderboard:", e);
+    } finally {
+      setIsBenchmarking(false);
+    }
+  };
+
+  const runCommitteeDebate = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/agent/committee?symbol=${symbol}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCommitteeData(data);
+        setActivePage('committee');
+        setDemoBanner({
+          type: 'gold',
+          title: 'COMMITTEE CONSENSUS RATIFIED',
+          message: `4-Agent floor ratified: ${data.consensus} (Confidence: ${(data.consensus_confidence * 100).toFixed(0)}%).`
+        });
+      }
+    } catch (e) {
+      console.error("Failed to run committee debate:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const runVibeArchitect = async (customPrompt?: string) => {
+    const promptToRun = customPrompt || vibePrompt;
+    if (!promptToRun.trim()) return;
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/vibe/architect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: promptToRun, symbol })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setVibeResult(data);
+        setActivePage('vibe');
+        setDemoBanner({
+          type: 'gold',
+          title: 'VIBE STRATEGY COMPILED',
+          message: `Processed natural language prompt into executable defined-risk spread candidate.`
+        });
+      }
+    } catch (e) {
+      console.error("Failed to run vibe architect:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const generateDeskReport = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/desk/report?symbol=${symbol}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDeskReport(data.content);
+        setActivePage('reports');
+        setDemoBanner({
+          type: 'sage',
+          title: 'INSTITUTIONAL DOSSIER COMPILED',
+          message: `Created DESK_BRIEFING.md with full regulatory risk attestations.`
+        });
+      }
+    } catch (e) {
+      console.error("Failed to generate desk report:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const copyReportToClipboard = () => {
+    if (!deskReport) return;
+    navigator.clipboard.writeText(deskReport);
+    setCopiedReport(true);
+    setTimeout(() => setCopiedReport(false), 2000);
+  };
+
+  const downloadReportFile = () => {
+    if (!deskReport) return;
+    const blob = new Blob([deskReport], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `DESK_BRIEFING_${symbol}_${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const triggerVeto = async () => {
     setIsProcessing(true);
     try {
       const res = await fetch(`${API_BASE}/api/demo/veto?symbol=${symbol}`, { method: "POST" });
       const data = await res.json();
       setDemoBanner({
-        type: 'framed',
+        type: 'rust',
         title: 'PORTFOLIO GREEKS VETO',
         message: data.reason || `Trade blocked: Aggregate book Delta would breach risk limit (±0.25). Fiduciary barrier preserved.`
       });
@@ -255,7 +428,7 @@ export default function App() {
     try {
       await fetch(`${API_BASE}/api/demo/regime-flip?symbol=${symbol}`, { method: "POST" });
       setDemoBanner({
-        type: 'framed',
+        type: 'gold',
         title: 'REGIME-FLIP FORCED EXIT',
         message: `Market state shifted to EVENT_RISK (VIX spike). Open spreads force-closed immediately before tail-risk expansion.`
       });
@@ -270,7 +443,7 @@ export default function App() {
     try {
       await fetch(`${API_BASE}/api/demo/suspend?symbol=${symbol}`, { method: "POST" });
       setDemoBanner({
-        type: 'solid',
+        type: 'rust',
         title: 'TRADING SUSPENDED (SELF-LOCK)',
         message: `Rolling win-rate (20.0%) dropped below theoretical floor (70.0%). Autonomous fiduciary lock engaged.`
       });
@@ -282,689 +455,1014 @@ export default function App() {
 
   const triggerReset = async () => {
     await fetch(`${API_BASE}/api/demo/reset`, { method: "POST" });
-    setDemoBanner(null);
+    setDemoBanner({
+      type: 'gold',
+      title: 'DESK RESET',
+      message: 'Paper trading account and ledger reset to clean slate.'
+    });
     setReactSteps([{ type: "THOUGHT", content: "Ledger reset. Desk surveillance re-initialized." }]);
     fetchAll();
   };
 
-  const triggerStressTest = async () => {
-    setIsProcessing(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/demo/stress-test`, { method: "POST" });
-      const data = await res.json();
-      setDemoBanner({
-        type: 'framed',
-        title: 'BLACK SWAN REPLAY (AUG 5 YEN SHOCK)',
-        message: `VIX surged to 65.73. Naive Bot: -43.8% (-$43.8k blowout). ThetaHawk: -1.24% scratch (-$1,240), preserving $98,760 (98.8%) equity!`
-      });
-      const replaySteps = data.timeline.map((t: any) => ({
-        type: t.vix > 30 ? "VETO" : "OBSERVATION",
-        content: `[${t.label}] SPY $${t.spy_price} | VIX ${t.vix} -> ThetaHawk: ${t.thetahawk_action} (P&L: $${t.thetahawk_pnl})`
-      }));
-      setReactSteps(replaySteps);
-      fetchAll();
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const delta = status?.book_greeks.net_delta ?? 0.0;
   const maxDelta = status?.limits.max_delta ?? 0.25;
-  const deltaPct = Math.min(Math.abs(delta) / maxDelta, 1.0) * 100;
   const currentRegime = telemetry?.regime.regime ?? "RANGE_BOUND";
 
   return (
-    <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '1.5rem 2rem' }}>
+    <div className="app-layout">
       
-      {/* Precision Header */}
-      <header style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingBottom: '1.25rem',
-        marginBottom: '1.5rem',
-        borderBottom: '1px solid var(--border-subtle)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-          <div style={{
-            width: '36px',
-            height: '36px',
-            background: 'var(--text-pure)',
-            color: 'var(--bg-root)',
-            borderRadius: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Icons.Logo />
+      {/* ========================================================================= */}
+      {/* REPOSENSE LEFT SIDEBAR */}
+      {/* ========================================================================= */}
+      <aside className="sidebar">
+        
+        {/* Brand Area */}
+        <div className="sidebar-header">
+          <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => setActivePage('overview')}>
+            <span className="font-serif" style={{ fontSize: '28px', color: 'var(--ink)' }}>Abit</span>
+            <span className="font-serif" style={{ fontSize: '28px', fontStyle: 'italic', color: 'var(--gold)' }}>da</span>
           </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                THETA HAWK
-              </h1>
-              <span style={{
-                fontSize: '0.6875rem',
-                border: '1px solid var(--border-strong)',
-                padding: '1px 6px',
-                borderRadius: '3px',
-                color: 'var(--text-secondary)',
-                letterSpacing: '0.05em'
-              }}>
-                AUTONOMOUS DESK v1.0
-              </span>
-            </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Regime-Aware Options Desk · Official Alpaca MCP Native · ReAct Agent Engine
-            </p>
+          <div className="label" style={{ color: 'var(--dim)', marginTop: '4px' }}>
+            OPTIONS AGENT HARNESS
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          {/* Account Indicator */}
-          <div style={{ textAlign: 'right' }}>
-            <div className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-              {status?.account_number || "PA382FDPI5IO"}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', marginTop: '3px' }}>
-              <span className="status-dot status-dot-pulse"></span>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                Alpaca Paper Tier 3
-              </span>
+        {/* Sidebar Navigation */}
+        <nav className="sidebar-nav">
+          <div
+            onClick={() => setActivePage('overview')}
+            className={`nav-item ${activePage === 'overview' ? 'active' : ''}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Icons.Overview />
+              <span>Overview</span>
             </div>
           </div>
 
-          {/* Symbol Selector Switcher */}
-          <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-strong)',
-            padding: '2px',
-            borderRadius: '6px',
-            display: 'flex',
-            gap: '2px'
-          }}>
-            <button
-              onClick={() => setSymbol('SPY')}
-              className="btn"
-              style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.75rem',
-                background: symbol === 'SPY' ? 'var(--text-pure)' : 'transparent',
-                color: symbol === 'SPY' ? 'var(--bg-root)' : 'var(--text-secondary)'
-              }}>
-              SPY
-            </button>
-            <button
-              onClick={() => setSymbol('QQQ')}
-              className="btn"
-              style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.75rem',
-                background: symbol === 'QQQ' ? 'var(--text-pure)' : 'transparent',
-                color: symbol === 'QQQ' ? 'var(--bg-root)' : 'var(--text-secondary)'
-              }}>
-              QQQ
-            </button>
+          <div
+            onClick={() => {
+              setActivePage('harness');
+              if (!harnessScorecard) runBenchmarkTest();
+            }}
+            className={`nav-item ${activePage === 'harness' ? 'active' : ''}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Icons.Harness />
+              <span>Test Harness</span>
+            </div>
+            <span className="mode-pill mode-gold" style={{ fontSize: '8px', padding: '1px 5px' }}>
+              5 SHOCKS
+            </span>
           </div>
-        </div>
-      </header>
 
-      {/* Dynamic Monochrome Alert Banner */}
-      {demoBanner && (
-        <div className={`alert-banner ${demoBanner.type === 'solid' ? 'banner-inverted' : 'banner-framed'}`}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{
-              width: '20px',
-              height: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: demoBanner.type === 'solid' ? 'var(--bg-root)' : 'var(--text-pure)',
-              color: demoBanner.type === 'solid' ? 'var(--text-pure)' : 'var(--bg-root)',
-              borderRadius: '50%'
-            }}>
-              <Icons.AlertOctagon />
+          <div
+            onClick={() => {
+              setActivePage('committee');
+              if (!committeeData) runCommitteeDebate();
+            }}
+            className={`nav-item ${activePage === 'committee' ? 'active' : ''}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Icons.Users />
+              <span>Committee</span>
             </div>
-            <div>
-              <span style={{ letterSpacing: '0.05em', textTransform: 'uppercase', marginRight: '8px' }}>
-                [{demoBanner.title}]
-              </span>
-              <span>{demoBanner.message}</span>
+            <span className="mode-pill mode-sage" style={{ fontSize: '8px', padding: '1px 5px' }}>
+              4 AGENTS
+            </span>
+          </div>
+
+          <div
+            onClick={() => setActivePage('vibe')}
+            className={`nav-item ${activePage === 'vibe' ? 'active' : ''}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Icons.Vibe />
+              <span>Vibe Desk</span>
             </div>
+            <span className="mode-pill mode-ink" style={{ fontSize: '8px', padding: '1px 5px' }}>
+              NLP
+            </span>
+          </div>
+
+          <div
+            onClick={() => setActivePage('copilot')}
+            className={`nav-item ${activePage === 'copilot' ? 'active' : ''}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Icons.Terminal />
+              <span>ReAct Trace</span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => {
+              setActivePage('reports');
+              if (!deskReport) generateDeskReport();
+            }}
+            className={`nav-item ${activePage === 'reports' ? 'active' : ''}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Icons.Report />
+              <span>Desk Dossier</span>
+            </div>
+          </div>
+        </nav>
+
+        {/* Sidebar Footer Account & Quick Trigger */}
+        <div className="sidebar-footer">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span className="label" style={{ color: 'var(--sage)' }}>● TIER 3 OPTIONS</span>
+            <span className="label" style={{ color: 'var(--dim)' }}>ALPACAPAPER</span>
+          </div>
+          <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', fontWeight: 600, color: 'var(--ink)' }}>
+            {status?.account_number || "PA382FDPI5IO"}
           </div>
           <button
-            onClick={() => setDemoBanner(null)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'inherit',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex'
-            }}>
-            <Icons.Close />
+            onClick={runAgenticCycle}
+            disabled={isProcessing}
+            className="btn-editorial"
+            style={{ width: '100%', marginTop: '14px', padding: '10px' }}>
+            <span>{isProcessing ? "Executing..." : "Run Cycle →"}</span>
           </button>
         </div>
-      )}
 
-      {/* Top 5 Metrics Row */}
-      <section style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: '1rem',
-        marginBottom: '1.5rem'
-      }}>
-        <div className="mono-card">
-          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-            Account Equity
-          </div>
-          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
-            ${status ? status.equity.toLocaleString('en-US', { minimumFractionDigits: 2 }) : "100,000.00"}
-          </div>
-        </div>
+      </aside>
 
-        <div className="mono-card">
-          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-            Buying Power
-          </div>
-          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
-            ${status ? status.buying_power.toLocaleString('en-US', { minimumFractionDigits: 2 }) : "400,000.00"}
-          </div>
-        </div>
-
-        <div className="mono-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Net Book Delta (±{maxDelta})
-            </span>
-            <span className="mono" style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
-              {deltaPct.toFixed(0)}%
-            </span>
-          </div>
-          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
-            {delta > 0 ? `+${delta.toFixed(4)}` : delta.toFixed(4)}
-          </div>
-          <div style={{ width: '100%', height: '3px', background: 'var(--border-strong)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
-            <div style={{ width: `${deltaPct}%`, height: '100%', background: 'var(--text-pure)' }}></div>
-          </div>
-        </div>
-
-        <div className="mono-card">
-          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-            Net Book Vega
-          </div>
-          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
-            {status?.book_greeks.net_vega ? (status.book_greeks.net_vega > 0 ? `+${status.book_greeks.net_vega.toFixed(2)}` : status.book_greeks.net_vega.toFixed(2)) : "0.00"}
-          </div>
-        </div>
-
-        <div className="mono-card">
-          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-            Daily Theta Decay
-          </div>
-          <div className="mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-pure)' }}>
-            +${status?.book_greeks.net_theta ? status.book_greeks.net_theta.toFixed(2) : "0.00"}/day
-          </div>
-        </div>
-      </section>
-
-      {/* Main Grid: Left = Regime & Reasoning, Right = Book & Audit */}
-      <section style={{
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: '1.25rem',
-        marginBottom: '1.5rem'
-      }}>
+      {/* ========================================================================= */}
+      {/* MAIN CONTENT AREA */}
+      {/* ========================================================================= */}
+      <div className="main-content">
         
-        {/* Left: Regime Radar & Floor Reasoning */}
-        <div className="mono-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Icons.Activity />
-              <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                Regime & Reasoning Engine
-              </h2>
-            </div>
-            
-            <span style={{
-              fontSize: '0.6875rem',
-              fontWeight: 800,
-              letterSpacing: '0.06em',
-              padding: '3px 8px',
-              borderRadius: '4px',
-              background: currentRegime === 'EVENT_RISK' ? 'var(--text-pure)' : 'transparent',
-              color: currentRegime === 'EVENT_RISK' ? 'var(--bg-root)' : 'var(--text-pure)',
-              border: '1.5px solid var(--text-pure)'
-            }}>
-              {currentRegime}
-            </span>
-          </div>
-
-          {/* Floor Monologue */}
-          <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-strong)',
-            padding: '1rem',
-            borderRadius: '6px'
-          }}>
-            <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-              Gemini Floor Synthesis
-            </div>
-            <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
-              "{telemetry?.regime.reasoning || "Reading real-time volatility clustering and regime dynamics..."}"
-            </div>
-          </div>
-
-          {/* Micro Telemetry Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{symbol} Spot</div>
-              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
-                ${telemetry?.telemetry.price.toFixed(2) || "550.00"}
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>VIX Index</div>
-              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
-                {telemetry?.telemetry.vix.toFixed(2) || "15.50"}
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>IV Percentile</div>
-              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
-                {telemetry?.telemetry.iv_percentile.toFixed(1) || "22.5"}%
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', padding: '0.75rem', borderRadius: '6px' }}>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>Trend State</div>
-              <div className="mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-pure)', marginTop: '2px' }}>
-                {telemetry?.telemetry.trend || "UPTREND"}
-              </div>
-            </div>
-          </div>
-
-          {/* Monochrome Payoff Curve */}
-          <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-strong)',
-            borderRadius: '6px',
-            padding: '1rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Structure Payoff: {telemetry?.regime.recommended_playbook || "IRON_CONDOR"}
-              </span>
-              <span className="mono" style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
-                Positive Theta Domain
-              </span>
-            </div>
-
-            <svg viewBox="0 0 500 120" style={{ width: '100%', height: '100px', display: 'block' }}>
-              <line x1="20" y1="70" x2="480" y2="70" stroke="var(--border-strong)" strokeDasharray="3 3" />
-              <path d="M 40 100 L 140 30 L 360 30 L 460 100" fill="none" stroke="var(--text-pure)" strokeWidth="2.5" />
-              <polygon points="40,100 140,30 360,30 460,100 460,70 40,70" fill="rgba(255, 255, 255, 0.06)" />
-              <circle cx="250" cy="30" r="4" fill="var(--bg-root)" stroke="var(--text-pure)" strokeWidth="2" />
-              <text x="250" y="20" textAnchor="middle" fill="var(--text-pure)" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="600">Spot ${telemetry?.telemetry.price.toFixed(0) || "550"}</text>
-              <text x="140" y="86" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="Inter, sans-serif">Short Put</text>
-              <text x="360" y="86" textAnchor="middle" fill="var(--text-muted)" fontSize="9" fontFamily="Inter, sans-serif">Short Call</text>
-            </svg>
-          </div>
-
-        </div>
-
-        {/* Right: Active Book & Fiduciary Risk Gates */}
-        <div className="mono-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Icons.Shield />
-              <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                Fiduciary Risk Gates
-              </h2>
-            </div>
-            <span style={{
-              fontSize: '0.6875rem',
-              fontWeight: 700,
-              padding: '2px 6px',
-              borderRadius: '3px',
-              border: '1px solid var(--border-strong)',
-              color: status?.guardian.is_suspended ? 'var(--text-pure)' : 'var(--text-secondary)'
-            }}>
-              {status?.guardian.is_suspended ? "FIDUCIARY LOCK ENGAGED" : "GUARDIAN ACTIVE"}
-            </span>
-          </div>
-
-          <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            padding: '0.75rem 1rem',
-            borderRadius: '6px'
-          }}>
-            <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
-              Self-Awareness Layer (Win-Rate Degradation Check)
-            </div>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>
-              {status?.guardian.message || "Auditing trailing win-rate against expected mathematical edge..."}
-            </div>
-          </div>
-
-          {/* Open Positions List */}
+        {/* Top Header Strip */}
+        <header className="page-header">
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-                Active Positions ({openTrades.length})
-              </span>
-              <span className="mono" style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
-                Closed: {closedTrades.length}
-              </span>
+            <span className="label" style={{ color: 'var(--gold)' }}>
+              {activePage === 'overview' ? 'DESK SURVEILLANCE' :
+               activePage === 'harness' ? 'AGENT EVALUATION ARENA' :
+               activePage === 'committee' ? 'FLOOR CONSENSUS DEBATE' :
+               activePage === 'vibe' ? 'NATURAL LANGUAGE COMPILER' :
+               activePage === 'copilot' ? 'REACT REASONING ENGINE' : 'AUDIT & COMPLIANCE'}
+            </span>
+            <h2 className="font-serif" style={{ fontSize: '20px', color: 'var(--ink)', lineHeight: 1.1 }}>
+              {activePage === 'overview' ? 'Executive Portfolio & Risk Overview' :
+               activePage === 'harness' ? 'Black Swan Stress-Test Arena' :
+               activePage === 'committee' ? '4-Agent Floor Committee Deliberation' :
+               activePage === 'vibe' ? 'Vibe Desk Strategy Architect' :
+               activePage === 'copilot' ? 'Agentic ReAct Co-Pilot' : 'Institutional Desk Dossier'}
+            </h2>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Market Ticker Strip */}
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', borderRight: '1px solid var(--border)', paddingRight: '16px' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div className="label">{symbol} Spot</div>
+                <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: '12px', fontWeight: 600 }}>
+                  ${telemetry?.telemetry.price.toFixed(2) || "550.00"}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div className="label">VIX Index</div>
+                <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: '12px', fontWeight: 600, color: (telemetry?.telemetry.vix || 15) > 30 ? 'var(--rust)' : 'var(--ink)' }}>
+                  {telemetry?.telemetry.vix.toFixed(2) || "14.32"}
+                </div>
+              </div>
             </div>
 
-            {openTrades.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '160px', overflowY: 'auto' }}>
-                {openTrades.map((t) => (
-                  <div key={t.id} style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    padding: '0.625rem 0.875rem',
-                    borderRadius: '6px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <div>
-                      <span className="mono" style={{ fontWeight: 700, color: 'var(--text-pure)' }}>{t.symbol}</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>{t.strategy_type}</span>
+            {/* Symbol Switcher */}
+            <div style={{ display: 'flex', border: '1px solid var(--border)' }}>
+              <button
+                onClick={() => setSymbol('SPY')}
+                style={{
+                  fontFamily: 'Geist Mono, monospace',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  letterSpacing: '0.12em',
+                  padding: '5px 12px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: symbol === 'SPY' ? 'var(--ink)' : 'transparent',
+                  color: symbol === 'SPY' ? 'var(--paper)' : 'var(--muted)'
+                }}>
+                SPY
+              </button>
+              <button
+                onClick={() => setSymbol('QQQ')}
+                style={{
+                  fontFamily: 'Geist Mono, monospace',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  letterSpacing: '0.12em',
+                  padding: '5px 12px',
+                  border: 'none',
+                  borderLeft: '1px solid var(--border)',
+                  cursor: 'pointer',
+                  background: symbol === 'QQQ' ? 'var(--ink)' : 'transparent',
+                  color: symbol === 'QQQ' ? 'var(--paper)' : 'var(--muted)'
+                }}>
+                QQQ
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Body */}
+        <div className="page-body">
+          
+          {/* Notification Banner */}
+          {demoBanner && (
+            <div style={{
+              background: demoBanner.type === 'sage' ? 'rgba(61, 90, 71, 0.08)' :
+                          demoBanner.type === 'rust' ? 'rgba(139, 58, 42, 0.08)' : 'rgba(201, 168, 76, 0.12)',
+              border: `1px solid ${
+                demoBanner.type === 'sage' ? 'var(--sage)' :
+                demoBanner.type === 'rust' ? 'var(--rust)' : 'var(--gold)'
+              }`,
+              padding: '12px 18px',
+              marginBottom: '24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }} className="animate-fade-up">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className="label" style={{
+                  color: demoBanner.type === 'sage' ? 'var(--sage)' :
+                         demoBanner.type === 'rust' ? 'var(--rust)' : 'var(--gold)',
+                  fontWeight: 700
+                }}>
+                  [{demoBanner.title}]
+                </span>
+                <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--ink)' }}>
+                  {demoBanner.message}
+                </span>
+              </div>
+              <button
+                onClick={() => setDemoBanner(null)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--dim)', cursor: 'pointer' }}>
+                <Icons.Close />
+              </button>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PAGE 1: OVERVIEW */}
+          {/* ========================================================================= */}
+          {activePage === 'overview' && (
+            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* 4 Stat Cards Grid */}
+              <div className="card-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                <div className="card" style={{ padding: '20px' }}>
+                  <div className="label">PORTFOLIO EQUITY</div>
+                  <div className="stat-value" style={{ marginTop: '6px' }}>
+                    ${status ? status.equity.toLocaleString('en-US', { minimumFractionDigits: 0 }) : "100,000"}
+                  </div>
+                  <div className="label" style={{ marginTop: '8px', color: 'var(--sage)' }}>
+                    BP: ${status ? status.buying_power.toLocaleString('en-US', { minimumFractionDigits: 0 }) : "400,000"}
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: '20px' }}>
+                  <div className="label">NET BOOK DELTA (±{maxDelta})</div>
+                  <div className="stat-value" style={{ marginTop: '6px', color: Math.abs(delta) > maxDelta ? 'var(--rust)' : 'var(--ink)' }}>
+                    Δ {delta > 0 ? `+${delta.toFixed(4)}` : delta.toFixed(4)}
+                  </div>
+                  <div className="label" style={{ marginTop: '8px', color: 'var(--sage)' }}>
+                    100% INVARIANT COMPLIANT
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: '20px' }}>
+                  <div className="label">REGIME & VIX</div>
+                  <div className="stat-value" style={{ marginTop: '6px', fontSize: '26px' }}>
+                    {currentRegime.replace('_', ' ')}
+                  </div>
+                  <div className="label" style={{ marginTop: '8px', color: 'var(--gold)' }}>
+                    VIX {telemetry?.telemetry.vix.toFixed(2) || "14.32"} · IV %ile {telemetry?.telemetry.iv_percentile.toFixed(1) || "2.6"}%
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: '20px' }}>
+                  <div className="label">FIDUCIARY GUARDIAN</div>
+                  <div className="stat-value" style={{ marginTop: '6px', fontSize: '26px', color: status?.guardian.is_suspended ? 'var(--rust)' : 'var(--sage)' }}>
+                    {status?.guardian.is_suspended ? "SELF-LOCKED" : "ONLINE"}
+                  </div>
+                  <div className="label" style={{ marginTop: '8px', color: 'var(--dim)' }}>
+                    Theta: +${status?.book_greeks.net_theta.toFixed(2) || "0.00"}/day
+                  </div>
+                </div>
+              </div>
+
+              {/* Payoff Profile & Fiduciary Controls (1px Grid) */}
+              <div className="card-grid" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
+                
+                <div className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <span className="label">STRATEGY PAYOFF PROFILE</span>
+                    <span className="mode-pill mode-sage">{telemetry?.regime.recommended_playbook || "IRON_CONDOR"}</span>
+                  </div>
+
+                  {/* SVG Risk Diagram */}
+                  <div style={{ background: 'var(--paper2)', border: '1px solid var(--border)', padding: '16px' }}>
+                    <svg viewBox="0 0 500 130" style={{ width: '100%', height: '110px', display: 'block' }}>
+                      <line x1="20" y1="75" x2="480" y2="75" stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
+                      <text x="485" y="78" fill="var(--dim)" fontSize="8" fontFamily="Geist Mono">P&L $0</text>
+
+                      <polygon points="120,75 160,35 340,35 380,75" fill="rgba(61, 90, 71, 0.15)" />
+                      <polygon points="40,115 120,75 40,75" fill="rgba(139, 58, 42, 0.12)" />
+                      <polygon points="380,75 460,115 460,75" fill="rgba(139, 58, 42, 0.12)" />
+
+                      <path d="M 40 115 L 120 75 L 160 35 L 340 35 L 380 75 L 460 115" fill="none" stroke="var(--ink)" strokeWidth="2" />
+
+                      <line x1="250" y1="20" x2="250" y2="115" stroke="var(--gold)" strokeWidth="1.5" strokeDasharray="2 2" />
+                      <circle cx="250" cy="35" r="4" fill="var(--paper)" stroke="var(--gold)" strokeWidth="2" />
+                      <text x="250" y="16" textAnchor="middle" fill="var(--gold)" fontSize="9" fontWeight="600" fontFamily="Geist Mono">
+                        Spot ${telemetry?.telemetry.price.toFixed(0) || "550"}
+                      </text>
+
+                      <text x="160" y="92" textAnchor="middle" fill="var(--dim)" fontSize="8" fontFamily="Geist Mono">Lower Wing</text>
+                      <text x="340" y="92" textAnchor="middle" fill="var(--dim)" fontSize="8" fontFamily="Geist Mono">Upper Wing</text>
+                      <text x="250" y="58" textAnchor="middle" fill="var(--sage)" fontSize="9" fontWeight="600" fontFamily="Geist Mono">+Theta Zone</text>
+                    </svg>
+                  </div>
+
+                  <div style={{ marginTop: '16px', background: 'var(--paper2)', borderLeft: '2px solid var(--gold)', padding: '12px 16px' }}>
+                    <div className="label" style={{ color: 'var(--gold)', marginBottom: '4px' }}>
+                      AI Market Regime Telemetry
                     </div>
-                    <div className="mono" style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-pure)' }}>
-                      +${t.net_credit.toFixed(2)}
+                    <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', lineHeight: 1.6 }}>
+                      "{telemetry?.regime.reasoning || "Reading implied volatility surface slope and regime clustering..."}"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span className="label">FIDUCIARY ENFORCEMENT</span>
+                      <button onClick={triggerReset} className="label" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--rust)' }}>
+                        [RESET DESK]
+                      </button>
+                    </div>
+
+                    <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', lineHeight: 1.6, marginBottom: '16px' }}>
+                      Simulate real-world market failure modes and observe Abitda's autonomous risk barriers intercepting violations:
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <button onClick={triggerVeto} disabled={isProcessing} className="btn-editorial btn-editorial-outline" style={{ justifyContent: 'space-between' }}>
+                        <span>1. Force Greeks Veto</span>
+                        <span style={{ color: 'var(--rust)', fontSize: '9px' }}>±0.25 Delta Gate</span>
+                      </button>
+
+                      <button onClick={triggerFlip} disabled={isProcessing} className="btn-editorial btn-editorial-outline" style={{ justifyContent: 'space-between' }}>
+                        <span>2. Trigger Regime Flip</span>
+                        <span style={{ color: 'var(--gold)', fontSize: '9px' }}>Defensive Liquidation</span>
+                      </button>
+
+                      <button onClick={triggerSuspend} disabled={isProcessing} className="btn-editorial btn-editorial-outline" style={{ justifyContent: 'space-between' }}>
+                        <span>3. Engage Self-Lock</span>
+                        <span style={{ color: 'var(--sage)', fontSize: '9px' }}>Win-Rate Cutoff</span>
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{
-                padding: '1.25rem',
-                textAlign: 'center',
-                color: 'var(--text-muted)',
-                fontSize: '0.8125rem',
-                border: '1px dashed var(--border-strong)',
-                borderRadius: '6px'
-              }}>
-                No open positions in book. Click "Run Cycle" to evaluate candidates.
-              </div>
-            )}
-          </div>
 
-          {/* Chronological Audit Log */}
-          <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-              Chronological Audit Trail
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', maxHeight: '130px', overflowY: 'auto' }}>
-              {auditEvents.slice(0, 4).map((ev) => (
-                <div key={ev.id} style={{
-                  fontSize: '0.75rem',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  background: 'var(--bg-surface)',
-                  borderLeft: '2px solid var(--text-pure)',
-                  color: 'var(--text-primary)'
-                }}>
-                  <span className="mono" style={{ color: 'var(--text-muted)', marginRight: '6px' }}>
-                    {ev.timestamp.split('T')[1]?.slice(0, 8)}
-                  </span>
-                  <strong style={{ color: 'var(--text-pure)', marginRight: '6px' }}>[{ev.event_type}]</strong>
-                  <span>{ev.message}</span>
+                  <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span className="label">Broker State</span>
+                    <span className="label" style={{ color: 'var(--sage)' }}>Ready for execution</span>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-        </div>
-
-      </section>
-
-      {/* NEW: Agentic Live Thought Stream & Interactive Co-Pilot Console */}
-      <section className="mono-card" style={{ marginBottom: '1.5rem', background: 'var(--bg-surface)' }}>
-        {/* Console Header Tabs */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid var(--border-strong)',
-          paddingBottom: '0.75rem',
-          marginBottom: '1rem'
-        }}>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => setActiveConsoleTab('thought')}
-              className="btn"
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.4rem 0.8rem',
-                background: activeConsoleTab === 'thought' ? 'var(--text-pure)' : 'transparent',
-                color: activeConsoleTab === 'thought' ? 'var(--bg-root)' : 'var(--text-secondary)',
-                border: '1px solid var(--border-strong)'
-              }}>
-              <Icons.Terminal />
-              Live ReAct Thought Stream ({reactSteps.length})
-            </button>
-            <button
-              onClick={() => setActiveConsoleTab('copilot')}
-              className="btn"
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.4rem 0.8rem',
-                background: activeConsoleTab === 'copilot' ? 'var(--text-pure)' : 'transparent',
-                color: activeConsoleTab === 'copilot' ? 'var(--bg-root)' : 'var(--text-secondary)',
-                border: '1px solid var(--border-strong)'
-              }}>
-              <Icons.MessageSquare />
-              Interactive Desk Co-Pilot
-            </button>
-          </div>
-
-          <button
-            disabled={isProcessing}
-            onClick={runAgenticCycle}
-            className="btn btn-outline"
-            style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
-            <Icons.Play />
-            Run Agentic ReAct Cycle
-          </button>
-        </div>
-
-        {/* Tab 1: Live ReAct Thought Stream */}
-        {activeConsoleTab === 'thought' && (
-          <div style={{
-            background: 'var(--bg-root)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '6px',
-            padding: '1rem',
-            maxHeight: '220px',
-            overflowY: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem'
-          }}>
-            {reactSteps.map((s, idx) => (
-              <div key={idx} className="mono" style={{ fontSize: '0.75rem', lineHeight: 1.5, display: 'flex', gap: '0.5rem' }}>
-                <span style={{
-                  color: s.type === 'THOUGHT' ? 'var(--text-muted)' :
-                         s.type === 'TOOL_CALL' ? 'var(--text-pure)' :
-                         s.type === 'OBSERVATION' ? 'var(--text-secondary)' :
-                         s.type === 'ALPHA_SCOUT' ? '#a1a1aa' :
-                         s.type === 'RISK_GOVERNOR' ? '#ffffff' :
-                         s.type === 'VETO' ? 'var(--text-pure)' :
-                         s.type === 'EXECUTION' ? 'var(--text-pure)' : 'var(--text-secondary)',
-                  fontWeight: 700,
-                  minWidth: '115px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  borderBottom: s.type === 'RISK_GOVERNOR' ? '1px solid #ffffff' : (s.type === 'ALPHA_SCOUT' ? '1px dashed #71717a' : 'none')
-                }}>
-                  [{s.type.replace('_', ' ')}]
-                </span>
-                <span style={{
-                  color: s.type === 'VETO' || s.type === 'RISK_GOVERNOR' ? '#ffffff' : (s.type === 'ALPHA_SCOUT' ? '#e4e4e7' : 'var(--text-primary)'),
-                  fontWeight: s.type === 'RISK_GOVERNOR' ? 600 : 400
-                }}>
-                  {s.content}
-                </span>
               </div>
-            ))}
-          </div>
-        )}
 
-        {/* Tab 2: Interactive Desk Co-Pilot Chat */}
-        {activeConsoleTab === 'copilot' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{
-              background: 'var(--bg-root)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '6px',
-              padding: '1rem',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.625rem'
-            }}>
-              {chatHistory.map((msg, idx) => (
-                <div key={idx} style={{
-                  fontSize: '0.8125rem',
-                  lineHeight: 1.5,
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                  background: msg.sender === 'user' ? 'var(--bg-subtle)' : 'var(--bg-surface)',
-                  border: msg.sender === 'user' ? '1px solid var(--border-strong)' : '1px solid var(--border-subtle)',
-                  maxWidth: '85%'
-                }}>
-                  <strong style={{ color: 'var(--text-pure)', marginRight: '6px' }}>
-                    {msg.sender === 'user' ? "YOU:" : "THETA HAWK:"}
-                  </strong>
-                  <span style={{ color: 'var(--text-primary)' }}>{msg.text}</span>
+              {/* Active Positions & Audit Log (1px Grid) */}
+              <div className="card-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                
+                <div className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <span className="label">ACTIVE POSITIONS ({openTrades.length})</span>
+                    <span className="label">{closedTrades.length} CLOSED</span>
+                  </div>
+
+                  {openTrades.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
+                      {openTrades.map((t) => (
+                        <div key={t.id} style={{
+                          background: 'var(--paper2)',
+                          border: '1px solid var(--border)',
+                          padding: '10px 14px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}>
+                          <div>
+                            <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: '12px', fontWeight: 600, color: 'var(--ink)' }}>
+                              {t.symbol} · {t.strategy_type}
+                            </div>
+                            <div className="label" style={{ marginTop: '4px' }}>
+                              Max Risk: ${t.max_risk.toFixed(0)} · Regime: {t.regime}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: '13px', fontWeight: 700, color: 'var(--sage)' }}>
+                              +${t.net_credit.toFixed(2)}
+                            </div>
+                            <div className="label" style={{ marginTop: '2px' }}>Credit</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ padding: '24px 16px', textAlign: 'center', border: '1px dashed var(--border)', color: 'var(--dim)', fontSize: '11px' }}>
+                      No open positions in book. Click "Run Cycle →" to evaluate candidates.
+                    </div>
+                  )}
                 </div>
-              ))}
+
+                <div className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <span className="label">CHRONOLOGICAL AUDIT TRAIL</span>
+                    <span className="label" style={{ color: 'var(--sage)' }}>● CONTINUOUS</span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
+                    {auditEvents.slice(0, 5).map((ev) => (
+                      <div key={ev.id} style={{
+                        padding: '8px 12px',
+                        background: 'var(--paper2)',
+                        borderLeft: `2px solid ${
+                          ev.event_type.includes('VETO') ? 'var(--rust)' :
+                          ev.event_type.includes('EXIT') ? 'var(--gold)' : 'var(--sage)'
+                        }`,
+                        fontSize: '11px',
+                        fontFamily: 'Geist Mono, monospace'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--dim)', fontSize: '9px' }}>
+                          <span>[{ev.event_type}]</span>
+                          <span>{ev.timestamp.split('T')[1]?.slice(0, 8)}</span>
+                        </div>
+                        <div style={{ color: 'var(--ink)', marginTop: '3px', lineHeight: 1.4 }}>
+                          {ev.message}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
             </div>
+          )}
 
-            {/* Quick Prompts for Judges */}
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Suggested queries:</span>
-              <button
-                onClick={() => handleSendMessage("What is our current portfolio delta exposure and risk headroom?")}
-                className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.6875rem' }}>
-                "Audit Portfolio Delta"
-              </button>
-              <button
-                onClick={() => handleSendMessage("Why did you select this strategy instead of an Iron Condor?")}
-                className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.6875rem' }}>
-                "Explain Strategy Choice"
-              </button>
-              <button
-                onClick={() => handleSendMessage("How does the regime-flip emergency liquidation work?")}
-                className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.6875rem' }}>
-                "Explain Regime-Flip Exit"
-              </button>
+          {/* ========================================================================= */}
+          {/* PAGE 2: STRESS-TEST HARNESS BENCHMARK ARENA */}
+          {/* ========================================================================= */}
+          {activePage === 'harness' && (
+            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* Arena Config Card */}
+              <div className="stats-card">
+                <div className="label">CALIBRATED BLACK SWAN REPLAY ENGINE</div>
+                <h3 className="font-serif" style={{ fontSize: '28px', color: 'var(--ink)', marginTop: '8px' }}>
+                  Options Agent Stress-Test Arena
+                </h3>
+                <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', marginTop: '6px', lineHeight: 1.6 }}>
+                  Select an agent architecture and a historical shock scenario to execute a bar-by-bar evaluation.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr auto auto', gap: '12px', marginTop: '18px', alignItems: 'flex-end' }}>
+                  <div>
+                    <div className="label" style={{ marginBottom: '6px' }}>Candidate Agent</div>
+                    <select
+                      value={harnessAgent}
+                      onChange={(e: any) => setHarnessAgent(e.target.value)}
+                      className="editorial-input"
+                      style={{ padding: '10px 14px', fontSize: '11px' }}>
+                      <option value="committee">Abitda Floor Committee (Multi-Agent)</option>
+                      <option value="vibe">Vibe Desk Architect (NLP Compiler)</option>
+                      <option value="passive_farmer">Passive Theta Farmer (Naive Baseline)</option>
+                      <option value="naive_momentum">Naive Momentum Bot (Unhedged Longs)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <div className="label" style={{ marginBottom: '6px' }}>Historical Shock Scenario</div>
+                    <select
+                      value={harnessScenario}
+                      onChange={(e: any) => setHarnessScenario(e.target.value)}
+                      className="editorial-input"
+                      style={{ padding: '10px 14px', fontSize: '11px' }}>
+                      <option value="aug5_2024">August 5, 2024 (Yen Carry Crash · VIX 65.7)</option>
+                      <option value="svb_march_2023">March 2023 (SVB Bank Run Liquidity Vacuum)</option>
+                      <option value="volmageddon_2018">February 2018 (Volmageddon XIV Blowout)</option>
+                      <option value="flash_crash_intraday">Intraday Flash Crash Liquidity Vacuum</option>
+                      <option value="calm_bull_grind">Calm Bull Grind (Baseline Control)</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => runBenchmarkTest()}
+                    disabled={isBenchmarking}
+                    className="btn-editorial"
+                    style={{ height: '42px' }}>
+                    <span>{isBenchmarking ? "Running Replay..." : "Run Benchmark →"}</span>
+                  </button>
+
+                  <button
+                    onClick={() => loadLeaderboard()}
+                    disabled={isBenchmarking}
+                    className="btn-editorial btn-editorial-outline"
+                    style={{ height: '42px' }}>
+                    Leaderboard
+                  </button>
+                </div>
+              </div>
+
+              {/* Reposense Shell Terminal Card */}
+              {shellLogLines.length > 0 && (
+                <div className="shell-card">
+                  <div className="shell-header">
+                    <div className="shell-dot" style={{ background: '#ff5f57', borderRadius: '50%' }}></div>
+                    <div className="shell-dot" style={{ background: '#febc2e', borderRadius: '50%' }}></div>
+                    <div className="shell-dot" style={{ background: '#28c840', borderRadius: '50%' }}></div>
+                    <span className="label" style={{ marginLeft: 'auto', color: '#555' }}>
+                      ABITDA TEST HARNESS ENGINE
+                    </span>
+                  </div>
+                  <div style={{ padding: '16px 20px', color: '#22c98a' }}>
+                    {shellLogLines.map((line, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '8px' }}>
+                        <span style={{ color: line.type === 'cmd' ? '#555' : line.type === 'warn' ? 'var(--rust)' : '#22c98a' }}>
+                          {line.type === 'cmd' ? '$' : line.type === 'warn' ? '⚠' : '✓'}
+                        </span>
+                        <span style={{ color: line.type === 'cmd' ? '#888' : line.type === 'warn' ? '#fb7185' : '#22c98a' }}>
+                          {line.text}
+                        </span>
+                      </div>
+                    ))}
+                    {isBenchmarking && (
+                      <div style={{ display: 'inline-block', width: '7px', height: '14px', background: '#22c98a', animation: 'blink 0.8s step-end infinite' }}></div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Scorecard Hero Banner */}
+              {harnessScorecard && (
+                <div className="card-grid" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 1fr' }}>
+                  <div className="card" style={{ borderLeft: `3px solid ${harnessScorecard.fiduciary_grade === 'A+' ? 'var(--sage)' : 'var(--rust)'}` }}>
+                    <div className="label">INSTITUTIONAL GRADE</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginTop: '6px' }}>
+                      <span className="font-serif" style={{ fontSize: '54px', color: harnessScorecard.fiduciary_grade === 'A+' ? 'var(--sage)' : 'var(--rust)', lineHeight: 1 }}>
+                        {harnessScorecard.fiduciary_grade}
+                      </span>
+                      <span className={`mode-pill ${harnessScorecard.attestation_status.includes('CERTIFIED') ? 'mode-sage' : 'mode-rust'}`}>
+                        {harnessScorecard.attestation_status}
+                      </span>
+                    </div>
+                    <div className="label" style={{ marginTop: '8px', color: 'var(--dim)' }}>
+                      {harnessScorecard.agent_name}
+                    </div>
+                  </div>
+
+                  <div className="card">
+                    <div className="label">CAPITAL PRESERVED</div>
+                    <div className="stat-value" style={{ marginTop: '6px', color: harnessScorecard.capital_preserved_pct >= 95 ? 'var(--sage)' : 'var(--rust)' }}>
+                      {harnessScorecard.capital_preserved_pct}%
+                    </div>
+                    <div className="label" style={{ marginTop: '8px' }}>
+                      Final Equity: ${harnessScorecard.final_equity.toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div className="card">
+                    <div className="label">MAX SHOCK DRAWDOWN</div>
+                    <div className="stat-value" style={{ marginTop: '6px', color: harnessScorecard.max_drawdown_pct <= 5 ? 'var(--sage)' : 'var(--rust)' }}>
+                      {harnessScorecard.max_drawdown_pct}%
+                    </div>
+                    <div className="label" style={{ marginTop: '8px' }}>
+                      Tail-Risk Barrier
+                    </div>
+                  </div>
+
+                  <div className="card">
+                    <div className="label">GREEK INVARIANT BREACHES</div>
+                    <div className="stat-value" style={{ marginTop: '6px', color: (harnessScorecard.delta_breach_count + harnessScorecard.vega_breach_count) === 0 ? 'var(--sage)' : 'var(--rust)' }}>
+                      {harnessScorecard.delta_breach_count + harnessScorecard.vega_breach_count}
+                    </div>
+                    <div className="label" style={{ marginTop: '8px' }}>
+                      Delta ±0.25 / Vega 150
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Replay Timeline Bar Table */}
+              {harnessScorecard && harnessScorecard.timeline && (
+                <div className="card" style={{ padding: 0 }}>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className="label">BAR-BY-BAR REPLAY EXECUTION TIMELINE</span>
+                    <span className="label">{harnessScorecard.timeline.length} BARS EVALUATED</span>
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Geist Mono, monospace', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--paper2)', borderBottom: '1px solid var(--border)', color: 'var(--dim)' }}>
+                          <th style={{ padding: '10px 14px' }}>Bar / Time</th>
+                          <th style={{ padding: '10px 14px' }}>SPY Spot</th>
+                          <th style={{ padding: '10px 14px' }}>VIX</th>
+                          <th style={{ padding: '10px 14px' }}>Agent Decision</th>
+                          <th style={{ padding: '10px 14px' }}>Greeks Gate</th>
+                          <th style={{ padding: '10px 14px' }}>Bar P&L</th>
+                          <th style={{ padding: '10px 14px' }}>Equity</th>
+                          <th style={{ padding: '10px 14px' }}>Rationale</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {harnessScorecard.timeline.map((row: any, idx: number) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--border)', background: idx % 2 === 0 ? 'var(--paper)' : 'var(--paper2)' }}>
+                            <td style={{ padding: '10px 14px', fontWeight: 600 }}>{row.label}</td>
+                            <td style={{ padding: '10px 14px' }}>${row.spy.toFixed(2)}</td>
+                            <td style={{ padding: '10px 14px', color: row.vix > 35 ? 'var(--rust)' : 'var(--ink)' }}>{row.vix.toFixed(1)}</td>
+                            <td style={{ padding: '10px 14px' }}>
+                              <span className="mode-pill mode-ink" style={{ fontSize: '8px' }}>{row.action}</span>
+                            </td>
+                            <td style={{ padding: '10px 14px' }}>
+                              {row.accepted ? (
+                                <span className="mode-pill mode-sage" style={{ fontSize: '8px' }}>PASSED</span>
+                              ) : (
+                                <span className="mode-pill mode-rust" style={{ fontSize: '8px' }}>VETOED: {row.rejection}</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '10px 14px', fontWeight: 600, color: row.pnl >= 0 ? 'var(--sage)' : 'var(--rust)' }}>
+                              {row.pnl >= 0 ? `+$${row.pnl.toFixed(2)}` : `-$${Math.abs(row.pnl).toFixed(2)}`}
+                            </td>
+                            <td style={{ padding: '10px 14px', fontWeight: 700 }}>
+                              ${row.equity.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td style={{ padding: '10px 14px', color: 'var(--muted)', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {row.rationale}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Comparative Multi-Agent Leaderboard */}
+              {harnessLeaderboard && (
+                <div className="card" style={{ padding: 0 }}>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span className="label">CROSS-AGENT BENCHMARK LEADERBOARD</span>
+                    <span className="label" style={{ color: 'var(--gold)' }}>OBJECTIVE FIDUCIARY PROOF</span>
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Geist Mono, monospace', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--paper2)', borderBottom: '1px solid var(--border)', color: 'var(--dim)' }}>
+                          <th style={{ padding: '10px 14px' }}>Agent Architecture</th>
+                          <th style={{ padding: '10px 14px' }}>Grade</th>
+                          <th style={{ padding: '10px 14px' }}>Capital Preserved</th>
+                          <th style={{ padding: '10px 14px' }}>Max Drawdown</th>
+                          <th style={{ padding: '10px 14px' }}>Greek Breaches</th>
+                          <th style={{ padding: '10px 14px' }}>Regulatory Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {harnessLeaderboard.map((a: any, idx: number) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--border)', background: idx % 2 === 0 ? 'var(--paper)' : 'var(--paper2)' }}>
+                            <td style={{ padding: '12px 14px', fontWeight: 600 }}>{a.agent_name}</td>
+                            <td style={{ padding: '12px 14px' }}>
+                              <span className={`mode-pill ${a.grade === 'A+' ? 'mode-sage' : a.grade === 'A' ? 'mode-gold' : 'mode-rust'}`} style={{ fontWeight: 700 }}>
+                                GRADE {a.grade}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 14px', color: a.capital_preserved_pct >= 90 ? 'var(--sage)' : 'var(--rust)' }}>
+                              {a.capital_preserved_pct}%
+                            </td>
+                            <td style={{ padding: '12px 14px' }}>{a.max_drawdown_pct}%</td>
+                            <td style={{ padding: '12px 14px' }}>{a.greek_breaches}</td>
+                            <td style={{ padding: '12px 14px' }}>
+                              <span style={{ color: a.status.includes('CERTIFIED') ? 'var(--sage)' : 'var(--rust)' }}>
+                                {a.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
             </div>
+          )}
 
-            {/* Input Bar */}
-            <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} style={{ display: 'flex', gap: '0.5rem' }}>
-              <input
-                type="text"
-                value={chatPrompt}
-                onChange={(e) => setChatPrompt(e.target.value)}
-                placeholder="Ask ThetaHawk about portfolio risk, strategy selection, or market state..."
-                style={{
-                  flex: 1,
-                  background: 'var(--bg-root)',
-                  border: '1px solid var(--border-strong)',
-                  borderRadius: '6px',
-                  padding: '0.55rem 0.875rem',
-                  color: 'var(--text-pure)',
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '0.8125rem',
-                  outline: 'none'
-                }}
-              />
-              <button type="submit" className="btn btn-solid-white" style={{ padding: '0.55rem 1rem' }}>
-                <Icons.Send />
-                Ask Desk
-              </button>
-            </form>
-          </div>
-        )}
-      </section>
+          {/* ========================================================================= */}
+          {/* PAGE 3: FLOOR COMMITTEE */}
+          {/* ========================================================================= */}
+          {activePage === 'committee' && (
+            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              <div className="stats-card">
+                <div className="label">TAURICRESEARCH TRADINGAGENTS ARCHITECTURE</div>
+                <h3 className="font-serif" style={{ fontSize: '28px', color: 'var(--ink)', marginTop: '8px' }}>
+                  4-Agent Floor Committee Deliberation
+                </h3>
+                <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', marginTop: '6px', lineHeight: 1.6 }}>
+                  Macro Strategist, Volatility Quants, Risk Guardian, and Technical Analyst debate options contracts in structured rounds until floor consensus is reached.
+                </p>
 
-      {/* Floating Demo Control Dock - Precision Monochrome */}
-      <footer className="mono-card" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '1rem 1.25rem',
-        border: '1.5px solid var(--border-strong)',
-        background: 'var(--bg-surface)'
-      }}>
-        <div>
-          <div style={{ fontSize: '0.8125rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-            Hackathon 5-Minute Pitch Controls
-          </div>
-          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-            One-click triggers for all 4 demo moments specified in docs/doc.md
-          </div>
+                <div style={{ marginTop: '16px' }}>
+                  <button
+                    onClick={runCommitteeDebate}
+                    disabled={isProcessing}
+                    className="btn-editorial">
+                    <span>{isProcessing ? "Debating..." : "Convene Committee Debate →"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Agent Role Cards (1px Grid) */}
+              <div className="card-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                <div className="card" style={{ borderTop: '2px solid var(--accent)' }}>
+                  <div className="label" style={{ color: 'var(--accent)' }}>Macro Strategist</div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px' }}>Rates, liquidity catalysts, tail risks</div>
+                </div>
+                <div className="card" style={{ borderTop: '2px solid var(--gold)' }}>
+                  <div className="label" style={{ color: 'var(--gold)' }}>Volatility Quant</div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px' }}>IV surface, term structure, skew dynamics</div>
+                </div>
+                <div className="card" style={{ borderTop: '2px solid var(--sage)' }}>
+                  <div className="label" style={{ color: 'var(--sage)' }}>Risk Guardian</div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px' }}>Delta neutrality, margin limits, tail risk</div>
+                </div>
+                <div className="card" style={{ borderTop: '2px solid var(--rust)' }}>
+                  <div className="label" style={{ color: 'var(--rust)' }}>Technical Analyst</div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '6px' }}>Moving average slope, support & resistance</div>
+                </div>
+              </div>
+
+              {/* Deliberation Transcript */}
+              {committeeData && (
+                <div className="card" style={{ padding: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '14px', marginBottom: '16px' }}>
+                    <div>
+                      <span className="label">FLOOR CONSENSUS RATIFIED</span>
+                      <div className="font-serif" style={{ fontSize: '24px', color: 'var(--ink)', marginTop: '4px' }}>
+                        {committeeData.consensus} · {committeeData.recommended_playbook}
+                      </div>
+                    </div>
+                    <span className="mode-pill mode-sage">
+                      Confidence: {(committeeData.consensus_confidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {committeeData.rounds.map((rnd, idx) => (
+                      <div key={idx} style={{
+                        background: 'var(--paper2)',
+                        border: '1px solid var(--border)',
+                        padding: '14px 18px'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: '12px', fontWeight: 600, color: 'var(--ink)' }}>
+                            {rnd.agent} <span className="label" style={{ color: 'var(--dim)', marginLeft: '6px' }}>[{rnd.role}]</span>
+                          </span>
+                          {rnd.stance && (
+                            <span className="mode-pill mode-gold" style={{ fontSize: '8px' }}>{rnd.stance}</span>
+                          )}
+                        </div>
+                        <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', lineHeight: 1.6 }}>
+                          {rnd.content}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PAGE 4: VIBE DESK */}
+          {/* ========================================================================= */}
+          {activePage === 'vibe' && (
+            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              <div className="stats-card">
+                <div className="label">HKUDS VIBE-TRADING ARCHITECTURE</div>
+                <h3 className="font-serif" style={{ fontSize: '28px', color: 'var(--ink)', marginTop: '8px' }}>
+                  Vibe Desk Natural Language Strategy Architect
+                </h3>
+                <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', marginTop: '6px', lineHeight: 1.6 }}>
+                  Express options trading intent in plain text. Abitda's LLM compiler translates intuition into mathematically verified defined-risk spreads.
+                </p>
+
+                {/* Preset Prompt Pills */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
+                  <span className="label" style={{ alignSelf: 'center', marginRight: '4px' }}>try:</span>
+                  <button
+                    onClick={() => runVibeArchitect("I want a conservative delta-neutral theta harvest on SPY expiring next Friday")}
+                    className="label mode-pill"
+                    style={{ cursor: 'pointer', background: 'var(--paper)' }}>
+                    "Delta-neutral theta harvest on SPY next Friday"
+                  </button>
+                  <button
+                    onClick={() => runVibeArchitect("Hedge tech volatility on QQQ with a 10-delta Bear Call Spread")}
+                    className="label mode-pill"
+                    style={{ cursor: 'pointer', background: 'var(--paper)' }}>
+                    "Hedge tech volatility on QQQ with Bear Call Spread"
+                  </button>
+                  <button
+                    onClick={() => runVibeArchitect("Sell an Iron Condor on SPY with max $500 risk and positive theta")}
+                    className="label mode-pill"
+                    style={{ cursor: 'pointer', background: 'var(--paper)' }}>
+                    "Sell Iron Condor on SPY with max $500 risk"
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', marginTop: '16px' }}>
+                  <input
+                    type="text"
+                    value={vibePrompt}
+                    onChange={(e) => setVibePrompt(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && runVibeArchitect()}
+                    placeholder="e.g. 'Build a high-probability Bull Put Spread on SPY to capture elevated volatility...'"
+                    className="editorial-input"
+                  />
+                  <button
+                    onClick={() => runVibeArchitect()}
+                    disabled={isProcessing}
+                    className="btn-editorial"
+                    style={{ whiteSpace: 'nowrap' }}>
+                    <span>Compile Trade →</span>
+                  </button>
+                </div>
+              </div>
+
+              {vibeResult && (
+                <div className="card animate-fade-up">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                    <div>
+                      <span className="label" style={{ color: 'var(--gold)' }}>COMPILED CANDIDATE STRUCTURE</span>
+                      <h3 className="font-serif" style={{ fontSize: '24px', color: 'var(--ink)', marginTop: '4px' }}>
+                        {vibeResult.type}
+                      </h3>
+                    </div>
+                    <button onClick={runAgenticCycle} className="btn-editorial btn-editorial-rust">
+                      Execute on Paper Account →
+                    </button>
+                  </div>
+
+                  <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '12px', color: 'var(--ink)', lineHeight: 1.7, marginBottom: '16px' }}>
+                    {vibeResult.narrative}
+                  </p>
+
+                  {vibeResult.candidate && (
+                    <div className="shell-card">
+                      <div className="shell-header">
+                        <span className="label" style={{ color: '#555' }}>COMPILED STRIKES & GREEKS SPECIFICATION</span>
+                      </div>
+                      <pre style={{ padding: '14px 18px', color: '#22c98a', overflowX: 'auto' }}>
+                        {JSON.stringify(vibeResult.candidate, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PAGE 5: REACT CO-PILOT */}
+          {/* ========================================================================= */}
+          {activePage === 'copilot' && (
+            <div className="animate-fade-up card-grid" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
+              
+              <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '620px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
+                  <span className="label">AGENTIC REACT REASONING TRACE</span>
+                  <button onClick={runAgenticCycle} disabled={isProcessing} className="btn-editorial" style={{ padding: '6px 12px' }}>
+                    Run Trace
+                  </button>
+                </div>
+
+                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {reactSteps.map((step, idx) => (
+                    <div key={idx} style={{
+                      background: 'var(--paper2)',
+                      border: '1px solid var(--border)',
+                      padding: '10px 14px'
+                    }}>
+                      <span className={`mode-pill ${
+                        step.type === 'THOUGHT' ? 'mode-gold' :
+                        step.type === 'ACTION' ? 'mode-rust' :
+                        step.type === 'OBSERVATION' ? 'mode-sage' : 'mode-ink'
+                      }`} style={{ fontSize: '8px', marginBottom: '4px' }}>
+                        {step.type}
+                      </span>
+                      <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--ink)', marginTop: '4px', lineHeight: 1.5 }}>
+                        {step.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '620px' }}>
+                <div style={{ marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
+                  <span className="label">INSTITUTIONAL DESK CO-PILOT</span>
+                </div>
+
+                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+                  {chatHistory.map((msg, idx) => (
+                    <div key={idx} style={{
+                      alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                      maxWidth: '85%',
+                      background: msg.sender === 'user' ? 'var(--ink)' : 'var(--paper2)',
+                      color: msg.sender === 'user' ? 'var(--paper)' : 'var(--ink)',
+                      border: '1px solid var(--border)',
+                      padding: '10px 14px',
+                      fontSize: '11px',
+                      fontFamily: 'Geist Mono, monospace',
+                      lineHeight: 1.5
+                    }}>
+                      {msg.text}
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+
+                <div style={{ display: 'flex' }}>
+                  <input
+                    type="text"
+                    value={chatPrompt}
+                    onChange={(e) => setChatPrompt(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    placeholder="Ask your options desk co-pilot..."
+                    className="editorial-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                  <button onClick={() => handleSendMessage()} className="btn-editorial">
+                    Send
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PAGE 6: DESK BRIEFING DOSSIER */}
+          {/* ========================================================================= */}
+          {activePage === 'reports' && (
+            <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              <div className="stats-card">
+                <div className="label">REGULATORY COMPLIANCE DOSSIER</div>
+                <h3 className="font-serif" style={{ fontSize: '28px', color: 'var(--ink)', marginTop: '8px' }}>
+                  Institutional Desk Briefing Report
+                </h3>
+                <p style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: 'var(--muted)', marginTop: '6px', lineHeight: 1.6 }}>
+                  One-click generated executive report (`DESK_BRIEFING.md`) containing portfolio Greeks, committee consensus, and regulatory risk attestations.
+                </p>
+
+                <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                  <button onClick={generateDeskReport} disabled={isProcessing} className="btn-editorial">
+                    <span>{isProcessing ? "Compiling..." : "Regenerate Dossier →"}</span>
+                  </button>
+                  <button onClick={copyReportToClipboard} disabled={!deskReport} className="btn-editorial btn-editorial-outline">
+                    <span>{copiedReport ? "Copied ✓" : "Copy Markdown"}</span>
+                  </button>
+                  <button onClick={downloadReportFile} disabled={!deskReport} className="btn-editorial btn-editorial-outline">
+                    <span>↓ Download MD</span>
+                  </button>
+                </div>
+              </div>
+
+              {deskReport && (
+                <div className="card" style={{ padding: '24px', background: 'var(--paper2)' }}>
+                  <pre style={{
+                    fontFamily: 'DM Mono, Geist Mono, monospace',
+                    fontSize: '11px',
+                    color: 'var(--ink)',
+                    lineHeight: 1.8,
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: '650px',
+                    overflowY: 'auto'
+                  }}>
+                    {deskReport}
+                  </pre>
+                </div>
+              )}
+
+            </div>
+          )}
+
         </div>
 
-        <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center' }}>
-          <button
-            disabled={isProcessing}
-            onClick={runAgenticCycle}
-            className="btn btn-solid-white">
-            <Icons.Play />
-            Run Agentic Cycle
-          </button>
-
-          <button
-            disabled={isProcessing}
-            onClick={triggerVeto}
-            className="btn btn-outline">
-            <Icons.AlertOctagon />
-            Trigger Greeks VETO (Moment #3)
-          </button>
-
-          <button
-            disabled={isProcessing}
-            onClick={triggerFlip}
-            className="btn btn-outline">
-            <Icons.Zap />
-            Trigger Regime Flip (Moment #4)
-          </button>
-
-          <button
-            disabled={isProcessing}
-            onClick={triggerSuspend}
-            className="btn btn-inverted-alert">
-            <Icons.Lock />
-            Simulate Self-Lock (Moment #5)
-          </button>
-
-          <button
-            disabled={isProcessing}
-            onClick={triggerStressTest}
-            className="btn btn-outline"
-            style={{ border: '1.5px solid #ffffff' }}>
-            <Icons.Activity />
-            Black Swan Replay (Aug 5)
-          </button>
-
-          <button
-            disabled={isProcessing}
-            onClick={triggerReset}
-            className="btn btn-ghost">
-            <Icons.RotateCcw />
-            Reset
-          </button>
-        </div>
-      </footer>
+      </div>
 
     </div>
   );

@@ -8,21 +8,35 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load environment variables
 load_dotenv(BASE_DIR / ".env")
 
+def get_secret(key: str, default: str = "") -> str:
+    val = os.getenv(key)
+    if val:
+        return val
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and key in st.secrets:
+            return str(st.secrets[key])
+    except Exception:
+        pass
+    return default
+
 # Alpaca Credentials
-ALPACA_API_KEY = os.getenv("ALPACA_API_KEY", "")
-ALPACA_SECRET_KEY = os.getenv("ALPACA_SECRET_KEY", "")
-ALPACA_PAPER = os.getenv("ALPACA_PAPER", "true").lower() == "true"
-ALPACA_BASE_URL = os.getenv("ALPACA_BASE_URL", "https://paper-api.alpaca.markets")
-ALPACA_ACCOUNT_ID = os.getenv("ALPACA_ACCOUNT_ID", "")
-ALPACA_ACCOUNT_NUMBER = os.getenv("ALPACA_ACCOUNT_NUMBER", "")
+ALPACA_API_KEY = get_secret("ALPACA_API_KEY", "")
+ALPACA_SECRET_KEY = get_secret("ALPACA_SECRET_KEY", "")
+ALPACA_PAPER = get_secret("ALPACA_PAPER", "true").lower() == "true"
+ALPACA_BASE_URL = get_secret("ALPACA_BASE_URL", "https://paper-api.alpaca.markets")
+ALPACA_ACCOUNT_ID = get_secret("ALPACA_ACCOUNT_ID", "")
+ALPACA_ACCOUNT_NUMBER = get_secret("ALPACA_ACCOUNT_NUMBER", "")
 
 # LLM Provider Key
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_API_KEY = get_secret("GEMINI_API_KEY", "")
 
 # Trading Configuration
 DEFAULT_SYMBOLS = ["SPY", "QQQ"]
-DATABASE_PATH = BASE_DIR / "thetatrap.sqlite3"
-LIVE_BROKER_EXECUTION = os.getenv("LIVE_BROKER_EXECUTION", "false").lower() == "true"
+DATABASE_PATH = BASE_DIR / "abitda.sqlite3"
+if not DATABASE_PATH.exists() and (BASE_DIR / "thetatrap.sqlite3").exists():
+    DATABASE_PATH = BASE_DIR / "thetatrap.sqlite3"
+LIVE_BROKER_EXECUTION = get_secret("LIVE_BROKER_EXECUTION", "false").lower() == "true"
 
 # Portfolio Risk Caps
 MAX_PORTFOLIO_DELTA = 0.25      # Max absolute aggregate book Delta

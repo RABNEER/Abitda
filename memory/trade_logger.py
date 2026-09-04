@@ -146,3 +146,6 @@ class TradeLedger:
             cursor.execute("SELECT * FROM audit_log ORDER BY id DESC LIMIT ?", (limit,))
             rows = cursor.fetchall()
             return [dict(r) for r in rows]
+
+    def get_audit_log(self, limit: int = 25) -> List[Dict[str, Any]]:
+        return self.get_recent_audit_events(limit=limit)

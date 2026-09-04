@@ -1,13 +1,13 @@
-# THETA HAWK — Regime-Aware Options Desk Agent
+# ABITDA — Autonomous Options Agent Test Harness & Institutional Desk
 **Alpaca AI Trading Agents Hackathon Submission**
 
-> An agent that trades like a seasoned options desk: reads the environment, adapts its strategy, sizes by conviction, manages the whole book, and knows when to stop.
+> An institutional evaluation harness and execution desk: reads the environment, benchmarks options agents against historical black swans, manages the whole book with Greeks barriers, and knows when to stop.
 
 ---
 
 ## 1. One-Sentence Pitch
 
-> THETA HAWK is the only agent in this hackathon that knows when it's wrong — it monitors its own win rate, suspends itself when its edge degrades, and force-closes positions when the market regime changes underneath it.
+> ABITDA is the only options platform in this hackathon that combines an institutional agent test harness with a fiduciary trading desk—it stress-tests any candidate LLM against historical black swans, audits portfolio Greeks, and autonomously locks trading when its statistical edge degrades.
 
 ---
 

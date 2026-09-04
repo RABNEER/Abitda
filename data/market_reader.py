@@ -9,14 +9,22 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 
+import time
+
 class MarketReader:
     def __init__(self):
-        pass
+        self._cache = {}
+        self._cache_ttl = 15.0
 
     def fetch_market_telemetry(self, symbol: str = "SPY") -> Dict[str, Any]:
         """
         Fetches current price, 52-week IV/HV stats, trend metrics, and VIX.
+        Uses a 15-second TTL cache for high responsiveness.
         """
+        now = time.time()
+        if symbol in self._cache and (now - self._cache[symbol]["ts"]) < self._cache_ttl:
+            return self._cache[symbol]["data"]
+
         try:
             # 1. Fetch Underlying Data (e.g. SPY)
             ticker = yf.Ticker(symbol)
@@ -57,7 +65,7 @@ class MarketReader:
                 current_vix = 15.5
                 vix_change_pct = 0.0
 
-            return {
+            result = {
                 "symbol": symbol,
                 "price": round(current_price, 2),
                 "vix": round(current_vix, 2),
@@ -69,9 +77,13 @@ class MarketReader:
                 "ma20": round(ma20, 2),
                 "ma50": round(ma50, 2)
             }
+            self._cache[symbol] = {"ts": now, "data": result}
+            return result
         except Exception as e:
             print(f"Error fetching market telemetry for {symbol}: {e}")
-            return self._get_fallback_telemetry(symbol)
+            fallback = self._get_fallback_telemetry(symbol)
+            self._cache[symbol] = {"ts": now, "data": fallback}
+            return fallback
 
     def _get_fallback_telemetry(self, symbol: str) -> Dict[str, Any]:
         """Realistic fallback telemetry for market closed or rate-limited environments."""

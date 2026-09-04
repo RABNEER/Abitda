@@ -1,5 +1,5 @@
 """
-ThetaHawk Real-Time Options Desk & Risk Dashboard
+Abitda Real-Time Options Desk & Risk Dashboard
 Built for the Alpaca AI Trading Agents Hackathon.
 Delivers the 4 required visual demo moments:
 1. Live Market Regime & Internal Monologue Gauge
@@ -17,7 +17,7 @@ import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
 
-from core.engine import ThetaHawkEngine
+from core.engine import AbitdaEngine, ThetaHawkEngine
 from config.settings import (
     MAX_PORTFOLIO_DELTA,
     MAX_PORTFOLIO_VEGA,
@@ -203,15 +203,15 @@ st.markdown("""
 
 # Initialize Engine in Session State
 if "engine" not in st.session_state:
-    st.session_state.engine = ThetaHawkEngine()
+    st.session_state.engine = AbitdaEngine()
 
 engine = st.session_state.engine
 
 # Header
 col_title, col_acct = st.columns([3, 1])
 with col_title:
-    st.markdown('<div class="main-header">🦅 THETA HAWK</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Autonomous Regime-Aware Options Desk · Official Alpaca MCP Native</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">⚡ ABITDA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Autonomous Options Desk & Agent Evaluation Harness · Alpaca Native</div>', unsafe_allow_html=True)
 with col_acct:
     acct = engine.broker.get_account_summary()
     st.markdown(f"""
@@ -320,7 +320,7 @@ if qp_col2.button("Audit Delta", use_container_width=True):
     ans = engine.copilot.ask_copilot(q)
     st.session_state.copilot_history.append((q, ans))
 
-user_q = st.sidebar.text_input("Ask ThetaHawk a question:", key="st_copilot_input")
+user_q = st.sidebar.text_input("Ask Abitda a question:", key="st_copilot_input")
 if st.sidebar.button("Send Query", use_container_width=True) and user_q:
     ans = engine.copilot.ask_copilot(user_q)
     st.session_state.copilot_history.append((user_q, ans))
@@ -356,7 +356,7 @@ if getattr(st.session_state, "demo_suspended", False):
 if getattr(st.session_state, "demo_stress", False):
     st.markdown("""
     <div style="background: linear-gradient(90deg, #450a0a 0%, #1e1b4b 100%); border: 1px solid #f43f5e; border-radius: 0.5rem; padding: 1rem; color: #fff1f2; margin-bottom: 1rem;">
-        💥 <b>[BLACK SWAN REPLAY: AUG 5 YEN SHOCK]</b> VIX surged to 65.73. Naive Options Bot: <b>-43.8% account blowout ($-43,800)</b>. ThetaHawk Early Exit: <b>-1.24% scratch ($-1,240)</b>, preserving <b>$98,760 (98.8%) of capital!</b>
+        💥 <b>[BLACK SWAN REPLAY: AUG 5 YEN SHOCK]</b> VIX surged to 65.73. Naive Options Bot: <b>-43.8% account blowout ($-43,800)</b>. Abitda Early Exit: <b>-1.24% scratch ($-1,240)</b>, preserving <b>$98,760 (98.8%) of capital!</b>
     </div>
     """, unsafe_allow_html=True)
 

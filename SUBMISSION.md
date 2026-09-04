@@ -1,4 +1,4 @@
-# THETA HAWK: The Regime-Aware Options Desk
+# ABITDA: Autonomous Options Agent Test Harness & Institutional Desk
 **Alpaca AI Trading Agents Hackathon Submission (lablab.ai)**  
 **Paper Trading Account:** `PA382FDPI5IO` | **Level 3 Options Clearance** | **$100,000 Starting Equity**  
 **Repository:** [github.com/RABNEER/ThetaHawk](https://github.com/RABNEER/ThetaHawk)
@@ -7,24 +7,22 @@
 
 ## 1. Executive Summary & Value Proposition
 
-> **"The only agent in this hackathon with institutional self-awareness: it manages the entire book's Greeks, force-closes positions when the volatility regime changes mid-trade, and autonomously locks trading when its statistical edge degrades."**
+> **"The institutional benchmark harness and execution desk for options trading agents: it stress-tests any candidate LLM against historical black swans, audits closed-form Black-Scholes Greeks invariants, and enforces autonomous fiduciary locks on live capital."**
 
-While 95% of AI trading submissions trade single-leg options in isolation or hook simple moving-average prompts to an LLM, institutional options desks face three catastrophic failure modes that naive bots completely ignore:
+While 95% of AI trading hackathon submissions present a single rigid bot that fails out-of-sample, institutional funds require a **reproducible evaluation test harness** before deploying any agent to live capital.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        THE 3 INSTITUTIONAL OPTIONS GAPS SOLVED                         │
-├────────────────────────────┬─────────────────────────────┬─────────────────────────────┤
-│ 1. Greek Concentration     │ 2. Mid-Trade Regime Flips   │ 3. Silent Edge Decay        │
-│ Naive: Checks risk trade-  │ Naive: Passively holds open │ Naive: Trades through losing│
-│ by-trade. 5 "safe" short   │ spreads until price stop or │ streaks until the account   │
-│ puts create catastrophic   │ expiration is breached.     │ reaches zero.               │
-│ negative Vega.             │                             │                             │
-│ THETA HAWK: Calculates Net │ THETA HAWK: Continuously    │ THETA HAWK: Runs rolling    │
-│ Book Delta (±0.25) & Vega  │ senses macro VIX shocks and │ binomial Z-score tests.     │
-│ (150) before order dispatch│ force-liquidates mid-trade  │ Autonomously locks trading  │
-│ and VETOES breaches.       │ before gamma explodes.      │ on statistical edge loss.   │
-└────────────────────────────┴─────────────────────────────┴─────────────────────────────┘
+│                          ABITDA 2-IN-1 QUANTITATIVE PLATFORM                           │
+├─────────────────────────────────────────────┬──────────────────────────────────────────┤
+│ 1. Institutional Agent Test Harness         │ 2. Fiduciary Autonomous Options Desk     │
+│ • Universal Protocol: Plug ANY agent        │ • Portfolio GreeksGate: Net Delta ±0.25, │
+│ • 5 Calibrated Stress Scenarios (Aug 5 2024,│   Net Vega < 150 strictly enforced.      │
+│   SVB 2023, Volmageddon 2018, Flash Crash)  │ • Regime-Flip Early Exit: Emergency      │
+│ • Quantitative Fiduciary Scorecard          │   liquidation on macro VIX surge (>12%). │
+│ • Institutional Certification (Grade A+ to F│ • Win-Rate Performance Guardian: Rolling │
+│   required before live Alpaca deployment)   │   binomial Z-score self-lock.            │
+└─────────────────────────────────────────────┴──────────────────────────────────────────┘
 ```
 
 ---
@@ -32,42 +30,41 @@ While 95% of AI trading submissions trade single-leg options in isolation or hoo
 ## 2. Quantitative System Architecture & MCP Interface
 
 ```
- [Macro Telemetry]                [AI Floor Quant]               [Institutional Defense]
-   VIX / IV %ile / SPY   ───►    Gemini 2.5 Flash ReAct   ───►     Portfolio Greeks Gate
-                               (Alpha Scout vs Risk Gov)           (Net Δ ±0.25, Net Vega 150)
+ [Stress Scenario Bar]       [Candidate Agent Candidate]       [Fiduciary Invariant Gate]
+   Aug 5 2024 / SVB   ───►   Committee / Vibe / Custom   ───►     Portfolio GreeksGate
+                                (Deliberates action)             (Net Δ ±0.25, Vega 150)
                                                                             │
-                                                                       Approved?
+                                                                       Compliant?
                                                                       /          \
                                                              YES    ▼              ▼  NO
-                                                          [Alpaca MCP]        [VETO BARRIER]
-                                                          Order Execute       Order Blocked
-                                                          (Paper Tier 3)      Capital Safe
+                                                          [GRADE A+ CERTIFIED]  [VETO / GRADE F]
+                                                          Live Alpaca Deploy    Capital Preserved
 ```
 
 ### Module Interface Breakdown
 
 | Subsystem | File / Component | Institutional Responsibility |
 | :--- | :--- | :--- |
-| **Broker Execution** | [`execution/alpaca_client.py`](execution/alpaca_client.py) | Executes multi-leg options orders via Alpaca Trading API & Model Context Protocol (MCP). |
-| **Native MCP Server** | [`mcp_server.py`](mcp_server.py) | FastMCP server exposing 6 floor quant tools over stdio to Claude Desktop, Cursor, and Gemini. |
-| **Greeks Engine** | [`data/greeks_engine.py`](data/greeks_engine.py) | Analytical Black-Scholes engine ($\Delta, \Gamma, \mathcal{V}, \Theta$) with zero compiled C-dependencies. |
-| **Macro Regime Agent** | [`agents/regime_agent.py`](agents/regime_agent.py) | Dynamically classifies market state: `RANGE_BOUND` (Condor), `TRENDING` (Spread), `EVENT_RISK` (Hedge). |
-| **Adversarial ReAct** | [`agents/copilot_agent.py`](agents/copilot_agent.py) | Multi-step ReAct loop featuring `[ALPHA SCOUT]` momentum proposal vs `[RISK GOVERNOR]` fiduciary veto. |
-| **Greeks Barrier (Gap #1)** | [`risk/portfolio_greeks_gate.py`](risk/portfolio_greeks_gate.py) | Blocks any order that would cause aggregate book Delta to breach $\pm0.25$ or Vega to exceed $150$. |
+| **Agent Test Harness** | [`harness/evaluator.py`](harness/evaluator.py) | Executes bar-by-bar stress replays, tallies Greek invariant breaches, and outputs institutional scorecard. |
+| **Universal Protocol** | [`harness/protocol.py`](harness/protocol.py) | Base class `OptionsAgentProtocol` + adapters for Committee, Vibe Desk, Naive Momentum, and Passive Farmer. |
+| **Stress Scenario Matrix**| [`harness/scenarios.py`](harness/scenarios.py) | 5 calibrated market shock episodes with historical volatility spikes (VIX up to 65.73). |
+| **4-Agent Committee** | [`agents/committee.py`](agents/committee.py) | Multi-agent floor debate (Macro, Technical, Alpha, Risk) inspired by `TauricResearch/TradingAgents`. |
+| **Vibe Desk Architect** | [`agents/vibe_desk.py`](agents/vibe_desk.py) | Natural language strategy structuring and sentiment shock checks inspired by `HKUDS/Vibe-Trading`. |
+| **Greeks Barrier (Gap #1)** | [`risk/portfolio_greeks_gate.py`](risk/portfolio_greeks_gate.py) | Blocks any order that causes aggregate book Delta to breach $\pm0.25$ or Vega to exceed $150$. |
 | **Regime Exit (Gap #2)** | [`risk/regime_flip_exit.py`](risk/regime_flip_exit.py) | Immediately liquidates open premium positions upon VIX surge (>30) or catalyst breakout. |
 | **Guardian Lock (Gap #3)** | [`risk/self_suspension.py`](risk/self_suspension.py) | Performance watchdog using rolling binomial Z-scores to trigger autonomous self-suspension. |
-| **Desk Terminal** | [`frontend/src/App.tsx`](frontend/src/App.tsx) | Institutional monochrome desktop desk (`ui-ux-pro-max`), SVG payoff curve, ReAct console & pitch dock. |
+| **Desk Terminal** | [`frontend/src/App.tsx`](frontend/src/App.tsx) | Institutional monochrome desktop desk (`ui-ux-pro-max`) with 6 console tabs and live benchmark runner. |
 
 ---
 
 ## 3. Empirical Black Swan Stress-Test: August 5, 2024 "Black Monday"
 
-To prove institutional viability beyond static backtests, Theta Hawk includes a deterministic replay of the **August 5, 2024 Yen Carry Trade Crash** (where VIX surged intraday from 23.4 to 65.73):
+To prove institutional viability beyond theoretical backtests, Abitda includes deterministic replays of historical volatility crises:
 
 ```
                                   FINAL SCORECARD: AUG 5 CRASH
 ┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Metric              ┃ Naive Options Bot (No Regime)┃ THETA HAWK Desk (Early Exit)┃
+┃ Metric              ┃ Naive Options Bot (No Regime)┃ Abitda Desk (Early Exit)    ┃
 ┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
 │ Ending Equity       │ $56,200.00                   │ $98,760.00                  │
 │ Total Drawdown      │ -$43,800.00 (-43.8%)         │ -$1,240.00 (-1.24%)         │
@@ -76,26 +73,30 @@ To prove institutional viability beyond static backtests, Theta Hawk includes a 
 │ Outcome             │ Margin Liquidation Blowout   │ Fiduciary Capital Retained  │
 └─────────────────────┴──────────────────────────────┴─────────────────────────────┘
 ```
-*Run locally via:* `python main.py --replay`
+*Run locally via CLI:* `abitda --benchmark --agent committee --scenario aug5_2024`
 
 ---
 
 ## 4. Lablab.ai 4-Axis Judging Rubric Compliance
 
-| Judging Axis | How THETA HAWK Satisfies the Criterion |
+| Judging Axis | How Abitda Satisfies the Criterion |
 | :--- | :--- |
-| **Application of Technology** | Direct integration with **Alpaca Trading API + Model Context Protocol (MCP)** on paper account `PA382FDPI5IO` + pure-Python Black-Scholes Greeks engine + Google Gemini ReAct loop. |
-| **Business Value** | Solves the core reason options funds fail: aggregate Greek concentration and edge decay. Protects institutional capital through mathematical fences rather than hopeful prompts. |
-| **Originality** | Differentiated from the common "LLM Council / Chatbot" pattern. Features true autonomous self-suspension, mid-trade regime-flip exits, and an adversarial ReAct internal debate. |
-| **Presentation Quality** | High-density monochrome institutional terminal (`ui-ux-pro-max`), interactive Plotly/SVG payoff curves, live ReAct trace stream, and 1-click pitch demo triggers. |
+| **Application of Technology** | Direct integration with **Alpaca Trading API + Model Context Protocol (MCP)** on paper account `PA382FDPI5IO` + pure-Python Black-Scholes Greeks engine + pluggable agent evaluation harness. |
+| **Business Value** | Solves the core reason options desks fail: unmonitored aggregate Greeks and edge decay. Provides institutional certification before capital deployment. |
+| **Originality** | Moves beyond "single bot prompts" into a standardized testing and execution harness (`Abitda`), featuring multi-agent deliberations and stress-testing suites. |
+| **Presentation Quality** | High-density monochrome institutional terminal (`ui-ux-pro-max`), interactive Plotly/SVG payoff curves, live ReAct stream, committee debate, and benchmark scorecards. |
 
 ---
 
 ## 5. 5-Minute Hackathon Demo Pitch Flow
 
-1. **Minute 0:00–1:00 (The Problem & Connection)**: Introduce paper account `PA382FDPI5IO` ($100k equity, Level 3 options) and explain why retail bots blow up by ignoring book Greeks.
-2. **Minute 1:00–2:00 (Live ReAct Loop & Payoff Diagram)**: Run `Run Agentic Cycle` to show the visible ReAct stream: `[ALPHA SCOUT]` proposes naked options $\rightarrow$ `[RISK GOVERNOR]` forces defined-risk spread $\rightarrow$ SVG Payoff curve renders.
-3. **Minute 2:00–3:00 (Moment #3 — Greeks Barrier VETO)**: Click `Trigger Greeks VETO` $\rightarrow$ watch the autonomous gate reject the order for exceeding $\pm0.25$ Delta.
-4. **Minute 3:00–4:00 (Moment #4 — Regime-Flip Early Exit)**: Click `Trigger Regime Flip` $\rightarrow$ watch open spreads force-liquidated mid-trade upon VIX spike.
-5. **Minute 4:00–4:45 (Moment #5 — Fiduciary Self-Lock)**: Click `Simulate Self-Lock` $\rightarrow$ show the binomial Z-score guardian suspend trading due to edge degradation.
-6. **Minute 4:45–5:00 (Floor Quant Q&A & Close)**: Ask the Co-Pilot *"Why didn't you buy naked calls today?"* and close on the one-sentence pitch.
+1. **Minute 0:00–1:00 (The Problem & The Harness Vision)**: Explain why single options bots fail without aggregate risk testing. Introduce `Abitda` as the options agent evaluation & execution harness.
+2. **Minute 1:00–2:00 (Agent Harness Benchmarking)**: Switch to the **"Agent Harness Benchmark"** tab. Select the 4-Agent Floor Committee and run the August 5, 2024 Yen Crash replay. Watch the live tick evaluation, zero Greek breaches, and `GRADE: A+ [INSTITUTIONAL CERTIFIED]` output.
+3. **Minute 2:00–2:45 (Naive Bot Contrast)**: Benchmark the `Naive Momentum Bot` on the same crash $\rightarrow$ watch multiple Delta/Vega breaches and instant `GRADE: F [DISQUALIFIED]`.
+4. **Minute 2:45–3:45 (Multi-Agent Floor Committee)**: Switch to **"4-Agent Floor Committee"** tab. Show the Macro Analyst, Technical Scout, Alpha Trader, and Risk Governor debate with real-time voting consensus.
+5. **Minute 3:45–4:30 (Institutional Briefing Dossier)**: Generate `DESK_BRIEFING.md` live $\rightarrow$ show executive solvency, ASCII Greek barrier diagram, and signed fiduciary attestation.
+6. **Minute 4:30–5:00 (Fiduciary Self-Lock & Close)**: Trigger `Self-Lock` $\rightarrow$ show the binomial Z-score guardian pause trading to protect capital. Close on the one-sentence pitch.
+
+---
+
+*Built with precision for the Alpaca AI Trading Agents Hackathon.*

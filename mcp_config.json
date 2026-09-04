@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "thetahawk-options-desk": {
+    "abitda-options-harness": {
       "command": "python",
       "args": ["mcp_server.py"],
-      "description": "ThetaHawk: Institutional Regime-Aware Options Desk with Portfolio Greeks Gate & Fiduciary Guardian"
+      "description": "Abitda: Autonomous Options Agent Test Harness & Institutional Desk for Alpaca"
     }
   }
 }

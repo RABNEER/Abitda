@@ -1,5 +1,5 @@
 """
-Regime Thresholds and Constants for ThetaHawk
+Regime Thresholds and Constants for Abitda
 Matches the specifications in docs/doc.md
 """
 
