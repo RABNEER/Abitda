@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <br/>
 
@@ -67,37 +67,78 @@ print(scorecard.fiduciary_grade)   # GRADE A+  or  GRADE F (VETOED)
 
 ---
 
-## 💡 What Is ABITDA?
+## 📖 Project Description
 
-Most trading projects build a bot. A bot is an LLM script with an API key that fires options orders into the market — and blows up the moment volatility spikes.
+### Executive Overview
 
-**ABITDA is not a bot. It is the institution that governs bots.**
+**ABITDA** (*Autonomous Options Agent Test Harness & Institutional Risk Desk*) is an end-to-end institutional framework designed to solve the single most dangerous problem in algorithmic finance today: **the blind deployment of AI agents with broker execution privileges.**
 
-It is a complete evaluation and execution framework that answers the question every quant needs answered before deploying real capital:
+While standard AI agents excel at generating text and sentiment signals, options trading requires managing non-linear payoff structures, asymmetric volatility skew, and multi-dimensional Greeks. Most autonomous trading bots fail catastrophically during volatility expansions because they evaluate trades in isolation and possess zero systemic risk awareness.
 
-> *"Has this agent been mathematically certified to survive a Black Swan event?"*
+ABITDA acts as the **fiduciary guardian and institutional proving ground** between candidate AI agents and the broker. Think of it as **SWE-bench for quantitative options finance** — a deterministic stress-testing crucible that subjects any AI trading agent to historical Black Swan crises, verifies mathematical portfolio safety through closed-form Black-Scholes calculations, and only routes trades to Alpaca if the agent demonstrates institutional survivability (Grade A+ certification).
+
+---
+
+### The Problem: Why Naive AI Trading Bots Blow Up
+
+The standard approach to AI trading in hackathons and research labs involves wiring an LLM prompt directly to a broker API:
 
 ```
-  NAIVE BOT:   [LLM says "buy calls"] ────▶ [Unhedged Delta] ────▶ 💥 -42.8% Liquidated
-
-  ABITDA:      [Any AI Agent]
-                    │
-                    ▼
-         [Harness Stress-Tests Against]
-         [Aug 5, 2024 Yen Crash | Volmageddon | SVB | Flash Crash | Bull Grind]
-                    │
-                    ▼
-         [Black-Scholes Greeks Firewall]
-         [|Δ| ≤ 0.25 | ν ≤ $150 | Zero Naked Wings]
-                    │
-                    ▼
-         [Fiduciary Score: 99.1/100 ──▶ GRADE A+ CERTIFIED]
-                    │
-                    ▼
-         [Alpaca Paper Broker PA382FDPI5IO]  ────▶ ✅ Order ACCEPTED
+  [LLM Prompt] ──▶ "Market looks bullish, buy calls" ──▶ [Broker API] ──▶ 💥 Account Liquidated
 ```
 
-Think of ABITDA like **SWE-bench for quantitative options finance** — a deterministic evaluation harness that tells you, with mathematical certainty, whether an AI agent should be trusted with real broker authority.
+In options trading, this naive paradigm suffers from **three fatal flaws**:
+
+1. **Per-Trade Myopia (Ignoring Aggregate Book Greeks):**  
+   A bot might open five individually "low risk" trades. But if each trade adds positive Delta and long Vega, the aggregate portfolio develops an extreme directional bias. A sudden 3% gap-down triggers cascading margin calls across the entire book.
+2. **The Volatility Shock Trap (Non-Linear Tail Risk):**  
+   During normal regimes, selling uncovered options generates steady premiums that create an illusion of profitability. But during market shocks — such as the **August 5, 2024 Yen Carry Trade Crash** (where the VIX exploded from 23.4 to 65.7 in hours) — unhedged short gamma and vega explode exponentially, wiping out months of gains in minutes.
+3. **Absence of Self-Awareness (Statistical Edge Decay):**  
+   When market regimes rotate from low-volatility range-bound grinds to high-volatility event-driven liquidity vacuums, bot strategies stop working. Lacking meta-cognition, naive bots continue firing losing trades until capital is completely depleted.
+
+---
+
+### The Solution: ABITDA's Three-Tier Institutional Architecture
+
+ABITDA re-architects the entire agent trading lifecycle through three interlocking institutional layers:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                               1. THE STRESS CRUCIBLE                                   │
+│  Deterministic bar-by-bar historical replay of the worst market crises in modern history:  │
+│  • Aug 5, 2024 Yen Crash (+181% VIX)        • 2018 Volmageddon XIV Cascade (-4.1% SPY)  │
+│  • 2023 SVB Regional Bank Run (-1.8% SPY)   • 1987 Black Monday Flash Crash (-20.5% SPY)│
+│  Output: Fiduciary Scorecard (0-100) & Survivorship Certification (Grade A+ to F)      │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ [Grade A+ Certified]
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                             2. MATHEMATICAL GREEKS FIREWALL                            │
+│  Analytically audits every proposed order BEFORE it touches the broker:               │
+│  • Greeks Barrier: Aggregate portfolio |Δ| ≤ 0.25 and ν ≤ $150 (Black-Scholes analytical)│
+│  • Spread Hardening: Strictly defined-risk credit structures (zero naked legs allowed)  │
+│  • Regime-Flip Emergency Exit: Autonomously liquidates short delta if VIX spikes >12%  │
+│  • Win-Rate Guardian: Real-time binomial z-score tracker locks trading on edge decay   │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ [Greeks Approved]
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        3. INSTITUTIONAL MULTI-AGENT EXECUTION                          │
+│  Autonomous 4-agent Floor Committee powered by Google Gemini 2.5 Flash:                │
+│  • Macro Scout (VIX term structure)         • Tech Scout (RSI & Bollinger bands)       │
+│  • Alpha Trader (Optimal strike selection)  • Risk Governor (Mandatory veto authority) │
+│  Live broker execution: Alpaca Paper Trading (Level 3 Approved · Account PA382FDPI5IO) │
+│  Universal access: Python SDK (`pip install abitda`), FastMCP Server, REST API, & Web   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Target Audience & Use Cases
+
+- **AI Researchers & Quant Developers:** Use ABITDA's `OptionsAgentProtocol` to benchmark candidate LLMs and multi-agent systems against identical historical crisis datasets.
+- **Autonomous Agent Swarms (MCP / REST):** Connect Claude, Cursor, or external agent swarms to institutional options execution tools safely through the Model Context Protocol (`abitda-mcp`) or the Agent Gateway REST API.
+- **Retail & Professional Traders:** Deploy algorithmic defined-risk strategies (Iron Condors, Vertical Spreads) on Alpaca with institutional-grade risk limits and automated edge-decay circuit breakers.
 
 ---
 
