@@ -1,7 +1,7 @@
 # ABITDA: Autonomous Options Agent Test Harness & Institutional Desk
 **Alpaca AI Trading Agents Hackathon Submission (lablab.ai)**  
 **Paper Trading Account:** `PA382FDPI5IO` | **Level 3 Options Clearance** | **$100,000 Starting Equity**  
-**Repository:** [github.com/RABNEER/ThetaHawk](https://github.com/RABNEER/ThetaHawk)
+**Repository:** [github.com/RABNEER/Abitda](https://github.com/RABNEER/Abitda) | **Live Demo:** [abitda.up.railway.app](https://abitda.up.railway.app) | **PyPI:** [pip install abitda](https://pypi.org/project/abitda)
 
 ---
 
