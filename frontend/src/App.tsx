@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { LiveTradingChart } from './components/LiveTradingChart';
 import { GreeksRiskMeter } from './components/GreeksRiskMeter';
 import { BenchmarkComparisonChart } from './components/BenchmarkComparisonChart';
+import { AgentGateway } from './components/AgentGateway';
 
 
 // Custom Minimalist SVG Icons
@@ -50,6 +51,12 @@ const Icons = {
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  ),
+  Connect: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
     </svg>
   )
 };
@@ -151,7 +158,7 @@ const API_BASE = (import.meta as any).env?.VITE_API_BASE ?? "";
 
 export default function App() {
   const [symbol, setSymbol] = useState<'SPY' | 'QQQ'>('SPY');
-  const [activePage, setActivePage] = useState<'overview' | 'harness' | 'committee' | 'vibe' | 'copilot' | 'reports'>('overview');
+  const [activePage, setActivePage] = useState<'overview' | 'harness' | 'committee' | 'vibe' | 'copilot' | 'reports' | 'connect'>('overview');
   
   const [status, setStatus] = useState<AccountStatus | null>(null);
   const [telemetry, setTelemetry] = useState<TelemetryData | null>(null);
@@ -564,6 +571,18 @@ export default function App() {
               <span>Desk Dossier</span>
             </div>
           </div>
+
+          <div
+            onClick={() => setActivePage('connect')}
+            className={`nav-item ${activePage === 'connect' ? 'active' : ''}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Icons.Connect />
+              <span>Agent Gateway</span>
+            </div>
+            <span className="mode-pill mode-sage" style={{ fontSize: '8px', padding: '1px 5px' }}>
+              MCP + REST
+            </span>
+          </div>
         </nav>
 
         {/* Sidebar Footer Account & Quick Trigger */}
@@ -599,14 +618,16 @@ export default function App() {
                activePage === 'harness' ? 'AGENT EVALUATION ARENA' :
                activePage === 'committee' ? 'FLOOR CONSENSUS DEBATE' :
                activePage === 'vibe' ? 'NATURAL LANGUAGE COMPILER' :
-               activePage === 'copilot' ? 'REACT REASONING ENGINE' : 'AUDIT & COMPLIANCE'}
+               activePage === 'copilot' ? 'REACT REASONING ENGINE' :
+               activePage === 'connect' ? 'AGENT INTEROPERABILITY' : 'AUDIT & COMPLIANCE'}
             </span>
             <h2 className="font-serif" style={{ fontSize: '20px', color: 'var(--ink)', lineHeight: 1.1 }}>
               {activePage === 'overview' ? 'Executive Portfolio & Risk Overview' :
                activePage === 'harness' ? 'Black Swan Stress-Test Arena' :
                activePage === 'committee' ? '4-Agent Floor Committee Deliberation' :
                activePage === 'vibe' ? 'Vibe Desk Strategy Architect' :
-               activePage === 'copilot' ? 'Agentic ReAct Co-Pilot' : 'Institutional Desk Dossier'}
+               activePage === 'copilot' ? 'Agentic ReAct Co-Pilot' :
+               activePage === 'connect' ? 'Agent Gateway & Protocol Connector (MCP & REST)' : 'Institutional Desk Dossier'}
             </h2>
           </div>
 
@@ -1505,6 +1526,15 @@ export default function App() {
                 </div>
               )}
 
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PAGE 7: AGENT GATEWAY (MCP & REST API) */}
+          {/* ========================================================================= */}
+          {activePage === 'connect' && (
+            <div className="animate-fade-up">
+              <AgentGateway apiBase={API_BASE} symbol={symbol} />
             </div>
           )}
 
